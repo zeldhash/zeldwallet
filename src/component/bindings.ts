@@ -1,6 +1,6 @@
 import { COPY_ICON, COPIED_ICON } from './render';
 
-type Strings = Record<string, string>;
+type Strings = Record<string, string> & { backupFilename?: string };
 
 type PasswordHandlers = {
   onShowForm: () => void;
@@ -128,7 +128,7 @@ export const bindPasswordVisibility = (shadowRoot: ShadowRoot, strings: Strings)
   }
 };
 
-export const bindBackupActions = (shadowRoot: ShadowRoot, handlers: BackupHandlers): void => {
+export const bindBackupActions = (shadowRoot: ShadowRoot, handlers: BackupHandlers, strings?: Strings): void => {
   const toggleButtons = Array.from(shadowRoot.querySelectorAll<HTMLButtonElement>('.zeldwallet-backup-button'));
   for (const toggleButton of toggleButtons) {
     toggleButton.addEventListener('click', () => {
@@ -178,7 +178,7 @@ export const bindBackupActions = (shadowRoot: ShadowRoot, handlers: BackupHandle
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = 'zeldwallet-backup.txt';
+      anchor.download = strings?.backupFilename ?? 'zeldwallet-backup.txt';
       anchor.click();
       setTimeout(() => URL.revokeObjectURL(url), 0);
     });

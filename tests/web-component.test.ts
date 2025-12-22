@@ -236,7 +236,7 @@ describe('ZeldWalletUI web component', () => {
 
     await (el as any).connect();
     await waitFor(() => {
-      expect(el.shadowRoot?.textContent ?? '').toMatch(/Portefeuille/);
+      expect(el.shadowRoot?.textContent ?? '').toMatch(/portefeuille/i);
     });
   });
 

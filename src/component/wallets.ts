@@ -56,6 +56,8 @@ export class WrongNetworkError extends Error {
   }
 }
 
+const codedError = (message: string, code: string): Error => Object.assign(new Error(message), { code });
+
 type AddressLike = Partial<AddressInfo> & { path?: string };
 
 export const FALLBACK_ICON =
@@ -323,14 +325,15 @@ const resolveProvider = async (entry: WalletEntry): Promise<any> => {
 
 const connectWith = async (
   entry: WalletEntry,
-  network: NetworkType
+  network: NetworkType,
+  requestMessage: string
 ): Promise<{ provider?: unknown; addresses: AddressLike[] }> => {
   const provider = await resolveProvider(entry);
   const requestFn = typeof (provider as any)?.request === 'function' ? (provider as any).request.bind(provider) : undefined;
   const addressParams = {
     purposes: ['payment', 'ordinals'],
     network: buildNetworkParams(network),
-    message: 'Requesting addresses for ZeldWallet',
+    message: requestMessage,
   };
 
   const attempts: Array<{ label: string; fn: () => Promise<any> }> = [];
@@ -352,7 +355,7 @@ const connectWith = async (
               network: { type: network === 'testnet' ? BitcoinNetworkType.Testnet : BitcoinNetworkType.Mainnet },
             },
             onFinish: (response) => resolve(response),
-            onCancel: () => reject(new Error('User cancelled')),
+            onCancel: () => reject(codedError('User cancelled.', 'user-cancelled')),
           });
         }),
     });
@@ -428,14 +431,18 @@ const connectWith = async (
     }
   }
 
-  throw lastError ?? new Error('No provider response');
+  throw lastError ?? codedError('No provider response.', 'wallet-no-provider');
 };
 
-export const connectExternalWallet = async (walletId: SupportedWalletId, network: NetworkType): Promise<ExternalWalletSession> => {
+export const connectExternalWallet = async (
+  walletId: SupportedWalletId,
+  network: NetworkType,
+  requestMessage: string
+): Promise<ExternalWalletSession> => {
   console.log('[connectExternalWallet] Starting connection for:', walletId, 'network:', network);
   
   if (walletId === 'zeld') {
-    throw new Error('ZeldWallet is built in. Use the default connect flow instead.');
+    throw codedError('ZeldWallet is built in. Use the default connect flow instead.', 'wallet-built-in');
   }
 
   const discovery = discoverWallets();
@@ -443,11 +450,11 @@ export const connectExternalWallet = async (walletId: SupportedWalletId, network
   
   const entry = discovery.entries[walletId];
   if (!entry) {
-    throw new Error('Wallet is not installed in this browser.');
+    throw codedError('Wallet is not installed in this browser.', 'wallet-not-installed');
   }
   console.log('[connectExternalWallet] Found entry:', { id: entry.id, name: entry.name, hasProvider: !!entry.provider, hasGetProvider: !!entry.getProvider });
 
-  const { provider, addresses } = await connectWith(entry, network);
+  const { provider, addresses } = await connectWith(entry, network, requestMessage);
   console.log('[connectExternalWallet] After connectWith:', {
     hasProvider: !!provider,
     providerType: typeof provider,
@@ -500,7 +507,7 @@ export const connectExternalWallet = async (walletId: SupportedWalletId, network
             console.log('[signMessage] Magic Eden signMessage response:', response);
             resolve(typeof response === 'string' ? response : (response as any)?.signature ?? JSON.stringify(response));
           },
-          onCancel: () => reject(new Error('User cancelled signing')),
+          onCancel: () => reject(codedError('User cancelled signing.', 'user-cancelled-signing')),
         });
       });
     }

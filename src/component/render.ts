@@ -181,7 +181,9 @@ const buildReadyBlock = (ready: WalletViewModel['ready']): string => {
     .join('');
 
   return `
-      <div class="zeldwallet-status">${ready.readyHint}</div>
+      <div class="zeldwallet-status">
+        <div>${ready.readyHint}</div>
+      </div>
       <div class="zeldwallet-rows">
         ${rows}
       </div>
@@ -212,18 +214,18 @@ const buildWalletSwitcher = (switcher: WalletSwitcherView): string => {
           <div class="zeldwallet-wallet-actions">
             ${
               opt.installed
-                ? `<span class="zeldwallet-badge zeldwallet-badge--installed">Installed</span>`
+                ? `<span class="zeldwallet-badge zeldwallet-badge--installed">${opt.installedLabel}</span>`
                 : opt.installUrl
-                  ? `<a class="zeldwallet-install-link" href="${opt.installUrl}" target="_blank" rel="noreferrer">Install</a>`
-                  : `<span class="zeldwallet-badge">Install</span>`
+                  ? `<a class="zeldwallet-install-link" href="${opt.installUrl}" target="_blank" rel="noreferrer">${opt.installLabel}</a>`
+                  : `<span class="zeldwallet-badge">${opt.installLabel}</span>`
             }
             <button
               class="zeldwallet-icon-button zeldwallet-connect-wallet"
               type="button"
               data-wallet-connect="${opt.id}"
               ${opt.connectDisabled ? 'disabled' : ''}
-              data-tooltip="Connect ${opt.name}"
-              aria-label="Connect ${opt.name}"
+              data-tooltip="${opt.connectLabel}"
+              aria-label="${opt.connectLabel}"
             >
               ${ZAP_ICON}
             </button>
@@ -236,9 +238,9 @@ const buildWalletSwitcher = (switcher: WalletSwitcherView): string => {
   return `
       <div class="zeldwallet-footer">
         <div class="zeldwallet-footer-left">
-          <div class="zeldwallet-network${networkClass}" aria-label="${switcher.networkLabel}: ${switcher.network}">
+          <div class="zeldwallet-network${networkClass}" aria-label="${switcher.networkLabel}: ${switcher.networkName}">
             <span class="zeldwallet-network-dot" aria-hidden="true"></span>
-            <span class="zeldwallet-network-name">${switcher.network}</span>
+            <span class="zeldwallet-network-name">${switcher.networkName}</span>
           </div>
         </div>
         <button class="zeldwallet-wallet-toggle" type="button" data-wallet-toggle aria-expanded="${switcher.open}">

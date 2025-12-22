@@ -259,7 +259,8 @@ export class ZeldWalletController {
     try {
       console.log('[controller.connectWallet] Connecting to external wallet:', walletId);
       const targetNetwork = networkOverride ?? this.state.externalNetwork ?? this.preferredNetwork;
-      const session = await connectExternalWallet(walletId, targetNetwork);
+      const strings = getStrings(this.locale);
+      const session = await connectExternalWallet(walletId, targetNetwork, strings.walletRequestAddresses);
       console.log('[controller.connectWallet] Session created:', {
         id: session.id,
         name: session.name,

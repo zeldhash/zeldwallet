@@ -192,7 +192,7 @@ export class ZeldWalletUI extends BaseElement {
         onSubmit: (value) => this.controller.handleExportBackup(value),
         onCancel: () => this.controller.hideBackupForm(),
         onCloseResult: () => this.controller.clearBackupResult(),
-      });
+      }, strings);
     }
   }
 

@@ -74,6 +74,7 @@ export type ReadyRowView = {
 };
 
 export type ReadyView = {
+  readyLabel: string;
   readyHint: string;
   rows: ReadyRowView[];
   networkLabel: string;
@@ -88,10 +89,14 @@ export type WalletOptionView = {
   installed: boolean;
   installUrl?: string;
   connectDisabled: boolean;
+  connectLabel: string;
+  installLabel: string;
+  installedLabel: string;
 };
 
 export type WalletSwitcherView = {
   networkLabel: string;
+  networkName: string;
   network: NetworkType;
   toggleLabel: string;
   open: boolean;
@@ -242,9 +247,19 @@ export const buildViewModel = ({
   const payment = addresses.find((a) => a.purpose === 'payment');
   const ordinals = addresses.find((a) => a.purpose === 'ordinals');
 
+  const walletDescriptions: Record<SupportedWalletId, string> = {
+    zeld: strings.walletDescriptionZeld,
+    xverse: strings.walletDescriptionXverse,
+    leather: strings.walletDescriptionLeather,
+    magicEden: strings.walletDescriptionMagicEden,
+  };
+
+  const networkName = network === 'testnet' ? strings.networkTestnet : strings.networkMainnet;
+
   const ready: ReadyView | undefined =
     state.status === 'ready'
       ? {
+          readyLabel: strings.ready,
           readyHint: strings.readyHint,
           rows: [
             {
@@ -271,6 +286,7 @@ export const buildViewModel = ({
 
   const options = (state.walletOptions ?? []).map((opt) => ({
     ...opt,
+    description: walletDescriptions[opt.id] ?? opt.description,
     icon: sanitizeWalletIcon(opt.icon),
   }));
 
@@ -278,12 +294,16 @@ export const buildViewModel = ({
 
   const walletSwitcher: WalletSwitcherView = {
     networkLabel: strings.networkLabel,
+    networkName,
     network,
-    toggleLabel: 'Use another wallet',
+    toggleLabel: strings.walletToggleLabel,
     open: state.walletPickerOpen,
     options: filteredOptions.map((opt) => ({
       ...opt,
       connectDisabled: !opt.installed,
+      connectLabel: strings.walletConnect.replace('{wallet}', opt.name),
+      installLabel: strings.walletInstall,
+      installedLabel: strings.walletInstalled,
     })),
   };
 

@@ -9,12 +9,18 @@ export const describeError = (error: unknown, locale: LocaleKey): string => {
   if (code === 'wrong-network') {
     const networkLabel =
       expectedNetwork === 'mainnet'
-        ? 'Mainnet'
+        ? strings.networkMainnet
         : expectedNetwork === 'testnet'
-          ? 'Testnet'
-          : expectedNetwork ?? 'the right network';
+          ? strings.networkTestnet
+          : expectedNetwork ?? strings.networkFallback;
     return strings.wrongNetwork.replace('{network}', String(networkLabel));
   }
+
+  if (code === 'wallet-not-installed') return strings.walletNotInstalled;
+  if (code === 'wallet-built-in') return strings.walletBuiltIn;
+  if (code === 'wallet-no-provider') return strings.walletNoProviderResponse;
+  if (code === 'user-cancelled') return strings.walletUserCancelled;
+  if (code === 'user-cancelled-signing') return strings.walletUserCancelledSigning;
 
   if (!error) return strings.error;
   if (error instanceof Error) return error.message || strings.error;

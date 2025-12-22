@@ -55,9 +55,29 @@ export type LocaleStrings = {
   copied: string;
   download: string;
   noAddresses: string;
+  walletToggleLabel: string;
+  walletInstalled: string;
+  walletInstall: string;
+  walletConnect: string;
+  walletRequestAddresses: string;
+  walletDescriptionZeld: string;
+  walletDescriptionXverse: string;
+  walletDescriptionLeather: string;
+  walletDescriptionMagicEden: string;
+  networkMainnet: string;
+  networkTestnet: string;
+  networkFallback: string;
+  walletNotInstalled: string;
+  walletBuiltIn: string;
+  walletNoProviderResponse: string;
+  walletUserCancelled: string;
+  walletUserCancelledSigning: string;
+  backupFilename: string;
 };
 
-const STRINGS: Record<LocaleKey, LocaleStrings> = {
+export type LocaleStringsInput = Partial<LocaleStrings>;
+
+const STRINGS: Record<LocaleKey, LocaleStringsInput> = {
   'en': en,
   'zh-CN': zhCN,
   'zh-TW': zhTW,
@@ -130,7 +150,9 @@ export function resolveLocale(input?: string): LocaleKey {
 }
 
 export function getStrings(lang?: string): LocaleStrings {
-  return STRINGS[resolveLocale(lang)];
+  const locale = resolveLocale(lang);
+  const strings = STRINGS[locale];
+  return { ...en, ...strings } as LocaleStrings;
 }
 
 export type TextDirection = 'ltr' | 'rtl';
