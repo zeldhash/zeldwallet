@@ -4,6 +4,13 @@ import type { SupportedWalletId, WalletOptionState } from './wallets';
 
 export type ComponentStatus = 'loading' | 'generating' | 'recovering' | 'locked' | 'ready' | 'error';
 
+export type BalanceState = {
+  btcSats: number;
+  zeldBalance: number;
+  loading: boolean;
+  error?: string;
+};
+
 export type ComponentState = {
   status: ComponentStatus;
   addresses?: AddressInfo[];
@@ -22,6 +29,7 @@ export type ComponentState = {
   walletPickerOpen: boolean;
   walletOptions: WalletOptionState[];
   externalNetwork?: NetworkType;
+  balance?: BalanceState;
 };
 
 export const createInitialState = (walletOptions: WalletOptionState[] = []): ComponentState => ({

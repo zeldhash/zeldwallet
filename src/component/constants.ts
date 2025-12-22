@@ -15,6 +15,10 @@ export const BITCOIN_ICON = `<svg class="zeldwallet-address-icon" width="24" hei
 // Ordinals icon (inscription-style diamond/gem)
 export const ORDINALS_ICON = `<svg class="zeldwallet-address-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 22,9 12,22 2,9" fill="none"/><polyline points="2,9 12,13 22,9"/><line x1="12" y1="13" x2="12" y2="22"/></svg>`;
 
+// API default URLs
+export const DEFAULT_ELECTRS_URL = 'https://mempool.space/api';
+export const DEFAULT_ZELDHASH_API_URL = 'https://api.zeldhash.com';
+
 // Gracefully support non-DOM environments (e.g., Node/Vitest) by falling back to
 // a no-op base class. This prevents `ReferenceError: HTMLElement is not defined`
 // when the module is imported outside a browser.

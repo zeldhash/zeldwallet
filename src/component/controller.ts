@@ -1,7 +1,8 @@
 import { ZeldWallet } from '../ZeldWallet';
 import type { AddressInfo, NetworkType, WalletEvent } from '../types';
 import { UnifiedWallet } from '../unifiedWallet';
-import { DEFAULT_PROVIDER } from './constants';
+import { fetchBalances } from './balance';
+import { DEFAULT_ELECTRS_URL, DEFAULT_PROVIDER, DEFAULT_ZELDHASH_API_URL } from './constants';
 import { describeError, isPasswordRequiredError, isWrongPasswordError } from './errors';
 import { getDirection, getStrings, resolveLocale, type LocaleKey, type LocaleStrings, type TextDirection } from './i18n';
 import { createInitialState, type ComponentState } from './state';
@@ -11,6 +12,8 @@ import {
   type SupportedWalletId,
   type WalletDiscovery,
 } from './wallets';
+
+const BALANCE_REFRESH_INTERVAL_MS = 30_000;
 
 export type ControllerSnapshot = {
   state: ComponentState;
@@ -29,6 +32,8 @@ export type ControllerOptions = {
   lang?: string;
   network?: NetworkType;
   autoconnect?: boolean;
+  electrsUrl?: string;
+  zeldhashApiUrl?: string;
   onChange?: Subscriber;
 };
 
@@ -50,6 +55,9 @@ export class ZeldWalletController {
   private subscribers = new Set<Subscriber>();
   private initialWalletId?: SupportedWalletId;
   private initialExternalNetwork?: NetworkType;
+  private electrsUrl: string;
+  private zeldhashApiUrl: string;
+  private balanceIntervalId?: ReturnType<typeof setInterval>;
 
   constructor(options?: ControllerOptions) {
     const discovery: WalletDiscovery = discoverWallets();
@@ -57,6 +65,8 @@ export class ZeldWalletController {
     this.locale = resolveLocale(options?.lang ?? 'en');
     this.preferredNetwork = options?.network === 'testnet' ? 'testnet' : 'mainnet';
     this.autoconnectEnabled = options?.autoconnect ?? true;
+    this.electrsUrl = options?.electrsUrl ?? DEFAULT_ELECTRS_URL;
+    this.zeldhashApiUrl = options?.zeldhashApiUrl ?? DEFAULT_ZELDHASH_API_URL;
     const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
     this.animationDelayMs = isTestEnv ? 10 : 4000;
     const stored = this.loadPreferredWallet();
@@ -137,6 +147,16 @@ export class ZeldWalletController {
     this.autoconnectEnabled = Boolean(value);
   }
 
+  setElectrsUrl(url?: string): void {
+    this.electrsUrl = url ?? DEFAULT_ELECTRS_URL;
+    void this.refreshBalances();
+  }
+
+  setZeldhashApiUrl(url?: string): void {
+    this.zeldhashApiUrl = url ?? DEFAULT_ZELDHASH_API_URL;
+    void this.refreshBalances();
+  }
+
   maybeAutoconnect(): void {
     if (!this.autoconnectEnabled || this.hasConnected) return;
     const targetWallet = this.initialWalletId ?? 'zeld';
@@ -170,12 +190,73 @@ export class ZeldWalletController {
   }
 
   detach(): void {
+    this.stopBalanceRefresh();
     this.resetIntegrationState();
   }
 
   destroy(): void {
     this.detach();
     this.subscribers.clear();
+  }
+
+  private startBalanceRefresh(): void {
+    this.stopBalanceRefresh();
+    void this.refreshBalances();
+    this.balanceIntervalId = setInterval(() => {
+      void this.refreshBalances();
+    }, BALANCE_REFRESH_INTERVAL_MS);
+  }
+
+  private stopBalanceRefresh(): void {
+    if (this.balanceIntervalId) {
+      clearInterval(this.balanceIntervalId);
+      this.balanceIntervalId = undefined;
+    }
+  }
+
+  private async refreshBalances(): Promise<void> {
+    const addresses = this.state.addresses;
+    if (!addresses || addresses.length === 0) {
+      this.setState({ balance: undefined });
+      return;
+    }
+
+    const addressStrings = addresses.map((a) => a.address).filter(Boolean);
+    if (addressStrings.length === 0) {
+      this.setState({ balance: undefined });
+      return;
+    }
+
+    // Set loading state
+    this.setState({
+      balance: {
+        btcSats: this.state.balance?.btcSats ?? 0,
+        zeldBalance: this.state.balance?.zeldBalance ?? 0,
+        loading: true,
+        error: undefined,
+      },
+    });
+
+    try {
+      const result = await fetchBalances(addressStrings, this.electrsUrl, this.zeldhashApiUrl);
+      this.setState({
+        balance: {
+          btcSats: result.btcSats,
+          zeldBalance: result.zeldBalance,
+          loading: false,
+          error: undefined,
+        },
+      });
+    } catch (error) {
+      this.setState({
+        balance: {
+          btcSats: this.state.balance?.btcSats ?? 0,
+          zeldBalance: this.state.balance?.zeldBalance ?? 0,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Balance fetch failed',
+        },
+      });
+    }
   }
 
   private getWalletName(id: SupportedWalletId): string {
@@ -288,6 +369,7 @@ export class ZeldWalletController {
       });
       this.initialExternalNetwork = session.network;
       this.persistPreferredWallet(walletId, session.network);
+      this.startBalanceRefresh();
     } catch (error) {
       console.error('[controller.connectWallet] Error connecting:', error);
       UnifiedWallet.reset();
@@ -444,6 +526,7 @@ export class ZeldWalletController {
         externalNetwork: undefined,
       });
       this.persistPreferredWallet('zeld', this.preferredNetwork);
+      this.startBalanceRefresh();
     } catch (error) {
       this.resetIntegrationState();
       this.setError(error);
@@ -491,6 +574,7 @@ export class ZeldWalletController {
         'lock',
         () => {
           if (this.state.walletKind !== 'zeld') return;
+          this.stopBalanceRefresh();
           this.unregisterProvider();
           this.setState({
             status: 'locked',
@@ -500,6 +584,7 @@ export class ZeldWalletController {
             showBackupForm: false,
             backupError: undefined,
             backupValue: undefined,
+            balance: undefined,
           });
         },
       ],
@@ -520,6 +605,7 @@ export class ZeldWalletController {
               showBackupForm: false,
               backupError: undefined,
             });
+            this.startBalanceRefresh();
           })();
         },
       ],

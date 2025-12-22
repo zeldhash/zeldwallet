@@ -40,6 +40,8 @@ export class ZeldWalletUI extends BaseElement {
       lang: this.getAttribute('lang') ?? undefined,
       network: networkAttr === 'testnet' ? 'testnet' : 'mainnet',
       autoconnect: autoconnectAttr !== 'false' && autoconnectAttr !== '0',
+      electrsUrl: this.getAttribute('electrs-url') ?? undefined,
+      zeldhashApiUrl: this.getAttribute('zeldhash-api-url') ?? undefined,
     });
 
     this.snapshot = this.controller.getSnapshot();
@@ -51,7 +53,7 @@ export class ZeldWalletUI extends BaseElement {
   }
 
   static get observedAttributes(): string[] {
-    return ['lang', 'network', 'autoconnect', 'variant'];
+    return ['lang', 'network', 'autoconnect', 'variant', 'electrs-url', 'zeldhash-api-url'];
   }
 
   get lang(): string {
@@ -100,6 +102,30 @@ export class ZeldWalletUI extends BaseElement {
     this.setAttribute('autoconnect', normalized ? 'true' : 'false');
   }
 
+  get electrsUrl(): string | null {
+    return this.getAttribute('electrs-url');
+  }
+
+  set electrsUrl(value: string | null) {
+    if (value == null) {
+      this.removeAttribute('electrs-url');
+    } else {
+      this.setAttribute('electrs-url', value);
+    }
+  }
+
+  get zeldhashApiUrl(): string | null {
+    return this.getAttribute('zeldhash-api-url');
+  }
+
+  set zeldhashApiUrl(value: string | null) {
+    if (value == null) {
+      this.removeAttribute('zeldhash-api-url');
+    } else {
+      this.setAttribute('zeldhash-api-url', value);
+    }
+  }
+
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'lang') {
       this.controller.setLocale(newValue ?? undefined);
@@ -118,6 +144,14 @@ export class ZeldWalletUI extends BaseElement {
     if (name === 'autoconnect') {
       this.controller.setAutoconnect(newValue !== 'false' && newValue !== '0');
       this.controller.maybeAutoconnect();
+    }
+
+    if (name === 'electrs-url') {
+      this.controller.setElectrsUrl(newValue ?? undefined);
+    }
+
+    if (name === 'zeldhash-api-url') {
+      this.controller.setZeldhashApiUrl(newValue ?? undefined);
     }
   }
 

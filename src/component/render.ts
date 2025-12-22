@@ -2,6 +2,8 @@ import { componentStyles } from './styles';
 import {
   buildViewModel,
   type ActionView,
+  type BalanceType,
+  type BalanceView,
   type InlineWarningView,
   type RenderTemplateProps,
   type WalletViewModel,
@@ -158,23 +160,52 @@ const buildLockedBlock = (locked: WalletViewModel['locked'], labels: WalletViewM
     `;
 };
 
+const buildBalanceValue = (
+  balance: BalanceView | undefined,
+  type: BalanceType
+): string => {
+  if (!balance) {
+    return `<span class="zeldwallet-balance-value zeldwallet-balance-loading">—</span>`;
+  }
+  if (balance.loading && balance.btcFormatted === '0' && balance.zeldFormatted === '0') {
+    return `<span class="zeldwallet-balance-value zeldwallet-balance-loading">
+      <span class="zeldwallet-balance-spinner" aria-hidden="true"></span>
+    </span>`;
+  }
+  const value = type === 'btc' ? balance.btcFormatted : balance.zeldFormatted;
+  const unit = type === 'btc' ? 'BTC' : 'ZELD';
+  const className = type === 'btc' ? 'zeldwallet-balance-btc' : 'zeldwallet-balance-zeld';
+  return `
+    <span class="zeldwallet-balance-value ${className}${balance.loading ? ' zeldwallet-balance-updating' : ''}">
+      <span class="zeldwallet-balance-amount">${value}</span>
+      <span class="zeldwallet-balance-unit">${unit}</span>
+    </span>
+  `;
+};
+
 const buildReadyBlock = (ready: WalletViewModel['ready']): string => {
   if (!ready) return '';
+
   const rows = ready.rows
     .map(
       (row) => `
         <div class="zeldwallet-row" part="row">
-          ${
-            row.icon && row.tooltip
-              ? `<span class="zeldwallet-label zeldwallet-label-icon" data-tooltip="${row.tooltip}" aria-label="${row.label}">${row.icon}</span>`
-              : `<span class="zeldwallet-label">${row.label}</span>`
-          }
-          <span class="zeldwallet-value">${row.value ?? ''}</span>
-          ${
-            row.copyValue
-              ? `<button class="zeldwallet-copy zeldwallet-copy-icon" part="copy-button" type="button" data-copy="${row.copyValue}" data-tooltip="${row.copyLabel}" aria-label="${row.copyLabel}">${COPY_ICON}</button>`
-              : ''
-          }
+          <div class="zeldwallet-row-left">
+            ${
+              row.icon && row.tooltip
+                ? `<span class="zeldwallet-label zeldwallet-label-icon" data-tooltip="${row.tooltip}" aria-label="${row.label}">${row.icon}</span>`
+                : `<span class="zeldwallet-label">${row.label}</span>`
+            }
+            <span class="zeldwallet-value" title="${row.value ?? ''}">${row.truncatedValue ?? row.value ?? ''}</span>
+            ${
+              row.copyValue
+                ? `<button class="zeldwallet-copy zeldwallet-copy-icon" part="copy-button" type="button" data-copy="${row.copyValue}" data-tooltip="${row.copyLabel}" aria-label="${row.copyLabel}">${COPY_ICON}</button>`
+                : ''
+            }
+          </div>
+          <div class="zeldwallet-row-right">
+            ${buildBalanceValue(ready.balance, row.balanceType)}
+          </div>
         </div>
       `
     )

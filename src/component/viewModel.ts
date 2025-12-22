@@ -1,7 +1,8 @@
 import type { NetworkType } from '../types';
+import { formatBtc, formatZeld, truncateAddress } from './balance';
+import { BITCOIN_ICON, ORDINALS_ICON } from './constants';
 import type { LocaleStrings, TextDirection } from './i18n';
 import type { ComponentState } from './state';
-import { BITCOIN_ICON, ORDINALS_ICON } from './constants';
 import { FALLBACK_ICON, type SupportedWalletId } from './wallets';
 
 export type RenderTemplateProps = {
@@ -64,13 +65,24 @@ export type BackupResultView = {
   cancelLabel: string;
 };
 
+export type BalanceType = 'btc' | 'zeld';
+
 export type ReadyRowView = {
   label: string;
   icon?: string;
   tooltip?: string;
   value?: string;
+  truncatedValue?: string;
   copyValue?: string;
   copyLabel: string;
+  balanceType: BalanceType;
+};
+
+export type BalanceView = {
+  btcFormatted: string;
+  zeldFormatted: string;
+  loading: boolean;
+  error?: string;
 };
 
 export type ReadyView = {
@@ -79,6 +91,7 @@ export type ReadyView = {
   rows: ReadyRowView[];
   networkLabel: string;
   network: NetworkType;
+  balance?: BalanceView;
 };
 
 export type WalletOptionView = {
@@ -247,6 +260,16 @@ export const buildViewModel = ({
   const payment = addresses.find((a) => a.purpose === 'payment');
   const ordinals = addresses.find((a) => a.purpose === 'ordinals');
 
+  // Format balance for display
+  const balanceView: BalanceView | undefined = state.balance
+    ? {
+        btcFormatted: formatBtc(state.balance.btcSats),
+        zeldFormatted: formatZeld(state.balance.zeldBalance),
+        loading: state.balance.loading,
+        error: state.balance.error,
+      }
+    : undefined;
+
   const walletDescriptions: Record<SupportedWalletId, string> = {
     zeld: strings.walletDescriptionZeld,
     xverse: strings.walletDescriptionXverse,
@@ -267,20 +290,25 @@ export const buildViewModel = ({
               icon: BITCOIN_ICON,
               tooltip: strings.paymentTooltip,
               value: payment?.address ?? strings.noAddresses,
+              truncatedValue: payment?.address ? truncateAddress(payment.address) : strings.noAddresses,
               copyValue: payment?.address,
               copyLabel: strings.copy,
+              balanceType: 'btc',
             },
             {
               label: strings.ordinalsLabel,
               icon: ORDINALS_ICON,
               tooltip: strings.ordinalsTooltip,
               value: ordinals?.address ?? strings.noAddresses,
+              truncatedValue: ordinals?.address ? truncateAddress(ordinals.address) : strings.noAddresses,
               copyValue: ordinals?.address,
               copyLabel: strings.copy,
+              balanceType: 'zeld',
             },
           ],
           networkLabel: strings.networkLabel,
           network,
+          balance: balanceView,
         }
       : undefined;
 

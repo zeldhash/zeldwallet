@@ -278,10 +278,67 @@ export const componentStyles = `
   }
   .zeldwallet-row {
     display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .zeldwallet-row-left {
+    display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
+    min-width: 0;
+  }
+  .zeldwallet-row-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+  }
+  .zeldwallet-balance-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .zeldwallet-balance-btc {
+    font-size: 24px;
+    font-weight: 700;
+    color: #f7931a;
+  }
+  .zeldwallet-balance-zeld {
+    font-size: 24px;
+    font-weight: 700;
+    color: #8b5cf6;
+  }
+  .zeldwallet-balance-unit {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.7;
+    text-transform: uppercase;
+    min-width: 36px;
+    text-align: left;
+  }
+  .zeldwallet-balance-amount {
+    text-align: right;
+  }
+  .zeldwallet-balance-loading {
+    color: #94a3b8;
+    font-size: 20px;
+  }
+  .zeldwallet-balance-updating {
+    opacity: 0.6;
+  }
+  .zeldwallet-balance-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #f7931a;
+    border-radius: 50%;
+    animation: zeldwallet-spin 1s linear infinite;
   }
   .zeldwallet-footer {
     margin-top: 8px;
@@ -599,6 +656,19 @@ export const componentStyles = `
   :host(.dark-card) .zeldwallet-wallet-row {
     background: transparent;
     border: 1px solid #1e1e28;
+  }
+  :host(.dark-card) .zeldwallet-balance-btc {
+    color: #f7931a;
+  }
+  :host(.dark-card) .zeldwallet-balance-zeld {
+    color: #a78bfa;
+  }
+  :host(.dark-card) .zeldwallet-balance-loading {
+    color: #6b7280;
+  }
+  :host(.dark-card) .zeldwallet-balance-spinner {
+    border-color: #2f2612;
+    border-top-color: #d4af37;
   }
   :host(.dark-card) .zeldwallet-wallet-desc {
     color: #e8e6e3;
