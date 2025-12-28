@@ -67,6 +67,7 @@ function main() {
 
   const wasmSrc = join(minerPath, 'wasm');
   const workerSrc = join(minerPath, 'dist', 'worker.js');
+  const nonceSrc = join(minerPath, 'dist', 'nonce.js');
   const publicDir = join(process.cwd(), 'public');
   const wasmDest = join(publicDir, 'wasm');
 
@@ -78,6 +79,11 @@ function main() {
 
   if (!existsSync(workerSrc)) {
     console.error(`❌ Worker source not found: ${workerSrc}`);
+    process.exit(1);
+  }
+
+  if (!existsSync(nonceSrc)) {
+    console.error(`❌ Nonce module source not found: ${nonceSrc}`);
     process.exit(1);
   }
 
@@ -106,6 +112,16 @@ function main() {
 
   writeFileSync(workerDest, workerContent);
   console.log('✓ Copied worker.js to public/');
+
+  // Copy and clean nonce.js (required by worker.js)
+  const nonceDest = join(publicDir, 'nonce.js');
+  let nonceContent = readFileSync(nonceSrc, 'utf8');
+
+  // Remove sourceMappingURL comment
+  nonceContent = nonceContent.replace(/\n?\/\/# sourceMappingURL=nonce\.js\.map\s*$/, '');
+
+  writeFileSync(nonceDest, nonceContent);
+  console.log('✓ Copied nonce.js to public/');
 
   console.log('\n🎉 ZeldWallet setup complete!');
   console.log('   WASM mining support is now available.\n');

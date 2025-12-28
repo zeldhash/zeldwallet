@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.10] - 2025-12-28
+
+### Fixed
+
+- Fixed WASM mining not working due to missing `nonce.js` module
+- Both `copy-wasm` script and `bin/setup.js` now properly copy `nonce.js` alongside `worker.js`
+
 ## [0.1.9] - 2025-12-28
 
 ### Changed
