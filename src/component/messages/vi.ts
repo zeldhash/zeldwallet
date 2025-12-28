@@ -145,4 +145,5 @@ export const vi: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'Không đủ ZELD. Cần: {required}, có: {available}.',
   minerErrorInsufficientBtcForZeld: 'Không đủ BTC để chuyển ZELD. Cần: {required} sats, có: {available} sats.',
   minerErrorInvalidTargetZeros: 'Số lượng số không không hợp lệ: {value}. Phải từ 6 đến 10.',
+  minerErrorNotInstalled: 'Module đào không khả dụng. Cài đặt zeldhash-miner: npm install zeldhash-miner',
 };

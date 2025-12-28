@@ -145,4 +145,5 @@ export const el: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'Ανεπαρκές ZELD. Απαιτούνται: {required}, διαθέσιμα: {available}.',
   minerErrorInsufficientBtcForZeld: 'Ανεπαρκές BTC για μεταφορά ZELD. Απαιτούνται: {required} sats, διαθέσιμα: {available} sats.',
   minerErrorInvalidTargetZeros: 'Μη έγκυρος αριθμός μηδενικών: {value}. Πρέπει να είναι μεταξύ 6 και 10.',
+  minerErrorNotInstalled: 'Η μονάδα εξόρυξης δεν είναι διαθέσιμη. Εγκαταστήστε zeldhash-miner: npm install zeldhash-miner',
 };

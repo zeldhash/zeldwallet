@@ -145,4 +145,5 @@ export const zhTW: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD 不足。需要 {required}，可用 {available}。',
   minerErrorInsufficientBtcForZeld: 'ZELD 轉帳 BTC 不足。需要 {required} 聰，可用 {available} 聰。',
   minerErrorInvalidTargetZeros: '無效的零數量：{value}。必須在 6 到 10 之間。',
+  minerErrorNotInstalled: '挖礦模組不可用。請安裝 zeldhash-miner：npm install zeldhash-miner',
 };

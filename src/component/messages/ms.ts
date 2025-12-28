@@ -145,4 +145,5 @@ export const ms: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD tidak mencukupi. Diperlukan: {required}, tersedia: {available}.',
   minerErrorInsufficientBtcForZeld: 'BTC tidak mencukupi untuk pemindahan ZELD. Diperlukan: {required} sats, tersedia: {available} sats.',
   minerErrorInvalidTargetZeros: 'Bilangan sifar tidak sah: {value}. Mesti antara 6 dan 10.',
+  minerErrorNotInstalled: 'Modul perlombongan tidak tersedia. Pasang zeldhash-miner: npm install zeldhash-miner',
 };

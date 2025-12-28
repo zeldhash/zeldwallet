@@ -145,4 +145,5 @@ export const it: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD insufficiente. Richiesto: {required}, disponibile: {available}.',
   minerErrorInsufficientBtcForZeld: 'BTC insufficiente per trasferimento ZELD. Richiesto: {required} sats, disponibile: {available} sats.',
   minerErrorInvalidTargetZeros: 'Numero di zeri non valido: {value}. Deve essere compreso tra 6 e 10.',
+  minerErrorNotInstalled: 'Modulo di mining non disponibile. Installa zeldhash-miner: npm install zeldhash-miner',
 };

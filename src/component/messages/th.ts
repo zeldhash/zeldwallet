@@ -145,4 +145,5 @@ export const th: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD ไม่เพียงพอ ต้องการ: {required}, มี: {available}',
   minerErrorInsufficientBtcForZeld: 'BTC ไม่เพียงพอสำหรับโอน ZELD ต้องการ: {required} sats, มี: {available} sats',
   minerErrorInvalidTargetZeros: 'จำนวนศูนย์ไม่ถูกต้อง: {value} ต้องอยู่ระหว่าง 6 ถึง 10',
+  minerErrorNotInstalled: 'โมดูลการขุดไม่พร้อมใช้งาน ติดตั้ง zeldhash-miner: npm install zeldhash-miner',
 };

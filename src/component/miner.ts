@@ -81,7 +81,8 @@ export type MinerErrorCode =
   | 'MINER_INSUFFICIENT_BTC'
   | 'MINER_INSUFFICIENT_ZELD'
   | 'MINER_INSUFFICIENT_BTC_FOR_ZELD'
-  | 'MINER_INVALID_TARGET_ZEROS';
+  | 'MINER_INVALID_TARGET_ZEROS'
+  | 'MINER_NOT_INSTALLED';
 
 /** Error thrown when funds are insufficient or other miner errors */
 export class MinerError extends Error {

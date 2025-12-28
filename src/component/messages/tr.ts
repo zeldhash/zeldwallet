@@ -145,4 +145,5 @@ export const tr: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'Yetersiz ZELD. Gerekli: {required}, mevcut: {available}.',
   minerErrorInsufficientBtcForZeld: 'ZELD transferi için yetersiz BTC. Gerekli: {required} satoshi, mevcut: {available} satoshi.',
   minerErrorInvalidTargetZeros: 'Geçersiz sıfır sayısı: {value}. 6 ile 10 arasında olmalıdır.',
+  minerErrorNotInstalled: 'Madencilik modülü mevcut değil. zeldhash-miner yükleyin: npm install zeldhash-miner',
 };

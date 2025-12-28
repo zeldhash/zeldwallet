@@ -145,4 +145,5 @@ export const ja: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELDが不足しています。必要：{required}、利用可能：{available}。',
   minerErrorInsufficientBtcForZeld: 'ZELD転送に必要なBTCが不足しています。必要：{required} sats、利用可能：{available} sats。',
   minerErrorInvalidTargetZeros: '無効なゼロ数：{value}。6から10の間である必要があります。',
+  minerErrorNotInstalled: 'マイニングモジュールが利用できません。zeldhash-minerをインストールしてください：npm install zeldhash-miner',
 };

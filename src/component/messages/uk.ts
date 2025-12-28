@@ -145,4 +145,5 @@ export const uk: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'Недостатньо ZELD. Потрібно: {required}, доступно: {available}.',
   minerErrorInsufficientBtcForZeld: 'Недостатньо BTC для переказу ZELD. Потрібно: {required} сатоші, доступно: {available} сатоші.',
   minerErrorInvalidTargetZeros: 'Недійсна кількість нулів: {value}. Має бути від 6 до 10.',
+  minerErrorNotInstalled: 'Модуль майнінгу недоступний. Встановіть zeldhash-miner: npm install zeldhash-miner',
 };

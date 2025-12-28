@@ -145,4 +145,5 @@ export const fa: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD کافی نیست. لازم: {required}، موجود: {available}.',
   minerErrorInsufficientBtcForZeld: 'BTC کافی برای انتقال ZELD نیست. لازم: {required} ساتوشی، موجود: {available} ساتوشی.',
   minerErrorInvalidTargetZeros: 'تعداد صفر نامعتبر: {value}. باید بین 6 و 10 باشد.',
+  minerErrorNotInstalled: 'ماژول استخراج در دسترس نیست. zeldhash-miner را نصب کنید: npm install zeldhash-miner',
 };

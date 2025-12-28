@@ -145,4 +145,5 @@ export const he: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'אין מספיק ZELD. נדרש: {required}, זמין: {available}.',
   minerErrorInsufficientBtcForZeld: 'אין מספיק BTC להעברת ZELD. נדרש: {required} סאטושי, זמין: {available} סאטושי.',
   minerErrorInvalidTargetZeros: 'מספר אפסים לא תקין: {value}. חייב להיות בין 6 ל-10.',
+  minerErrorNotInstalled: 'מודול הכרייה אינו זמין. התקן zeldhash-miner: npm install zeldhash-miner',
 };

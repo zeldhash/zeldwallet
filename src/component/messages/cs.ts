@@ -145,4 +145,5 @@ export const cs: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'Nedostatek ZELD. Potřeba: {required}, dostupné: {available}.',
   minerErrorInsufficientBtcForZeld: 'Nedostatek BTC pro ZELD převod. Potřeba: {required} satoshi, dostupné: {available} satoshi.',
   minerErrorInvalidTargetZeros: 'Neplatný počet nul: {value}. Musí být mezi 6 a 10.',
+  minerErrorNotInstalled: 'Těžební modul není k dispozici. Nainstalujte zeldhash-miner: npm install zeldhash-miner',
 };

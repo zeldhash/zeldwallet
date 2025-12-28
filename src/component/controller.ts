@@ -8,18 +8,74 @@ import { AUTO_LOCK_TIMEOUT_MS, DEFAULT_ELECTRS_URL, DEFAULT_PROVIDER, DEFAULT_ZE
 import { describeError, isPasswordRequiredError, isWrongPasswordError } from './errors';
 import { getDirection, getStrings, resolveLocale, type LocaleKey, type LocaleStrings, type TextDirection } from './i18n';
 import { createInitialHuntingState, createInitialMnemonicRestoreState, createInitialState, type ComponentState, type FeeMode, type MobileActiveTab, type OpReturnData, type ParsedTransaction, type ParsedTxInput, type ParsedTxOutput, type RecommendedFees } from './state';
-import { prepareMinerArgs, type OrdinalsUtxo, type UtxoInfo } from './miner';
+import { prepareMinerArgs, MinerError, type OrdinalsUtxo, type UtxoInfo } from './miner';
 import {
   connectExternalWallet,
   discoverWallets,
   type SupportedWalletId,
   type WalletDiscovery,
 } from './wallets';
-// Types imported statically (no runtime import, compatible with Next.js/Turbopack)
-import type { ZeldMiner, ZeldMinerError, ProgressStats, MineResult } from 'zeldhash-miner';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// zeldhash-miner types (inlined to avoid import dependency)
+// The actual module is optional and lazy-loaded at runtime
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Miner progress stats */
+interface ProgressStats {
+  hashRate: number;
+  hashesProcessed: bigint;
+  elapsedMs?: number;
+}
+
+/** Miner result when a valid nonce is found */
+interface MineResult {
+  txid: string;
+  psbt: string;
+  nonce: bigint;
+  attempts: bigint;
+  duration: number;
+}
+
+/** Miner error with code */
+interface ZeldMinerError extends Error {
+  code: number;
+}
+
+/** Miner interface (partial, only what we use) */
+interface ZeldMiner {
+  on(event: 'progress', handler: (stats: ProgressStats) => void): void;
+  on(event: 'found', handler: (result: MineResult) => void): void;
+  on(event: 'error', handler: (err: ZeldMinerError) => void): void;
+  on(event: 'stopped', handler: () => void): void;
+  mineTransaction(params: {
+    inputs: unknown[];
+    outputs: unknown[];
+    targetZeros: number;
+    startNonce: bigint;
+    distribution?: bigint[];
+    signal?: AbortSignal;
+  }): Promise<void>;
+  pause(): void;
+  resume(): void;
+  stop(): void;
+}
+
+/** Module shape for zeldhash-miner */
+interface ZeldMinerModule {
+  ZeldMiner: new (options: {
+    network: 'mainnet' | 'testnet';
+    batchSize: number;
+    useWebGPU: boolean;
+    workerThreads: number;
+    satsPerVbyte: number;
+  }) => ZeldMiner;
+  ZeldMinerError: new (message: string, code: number) => ZeldMinerError;
+  ZeldMinerErrorCode: { MINING_ABORTED: number; [key: string]: number };
+}
 
 // Lazy-loaded miner module reference (loaded only when startHunting is called)
-let zeldMinerModule: typeof import('zeldhash-miner') | undefined;
+let zeldMinerModule: ZeldMinerModule | undefined;
 
 const BALANCE_REFRESH_INTERVAL_MS = 30_000;
 
@@ -1537,10 +1593,17 @@ export class ZeldWalletController {
       }
       this.setHuntingState({ inputUtxoZeldBalances });
 
-      // Lazy-load zeldhash-miner module (avoids Worker initialization at import time)
-      // This is required for Next.js/Turbopack compatibility
+      // Lazy-load zeldhash-miner module (optional peer dependency)
+      // This avoids Worker initialization at import time and is required for Next.js/Turbopack compatibility
       if (!zeldMinerModule) {
-        zeldMinerModule = await import('zeldhash-miner');
+        try {
+          // Dynamic import of optional peer dependency
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          zeldMinerModule = await import('zeldhash-miner') as any as ZeldMinerModule;
+        } catch {
+          // zeldhash-miner is not installed
+          throw new MinerError('MINER_NOT_INSTALLED');
+        }
       }
       const { ZeldMiner: MinerClass } = zeldMinerModule;
 
@@ -1636,7 +1699,8 @@ export class ZeldWalletController {
           return;
         }
       }
-      const message = error instanceof Error ? error.message : 'Mining failed';
+      // Use describeError to get translated message for MinerError
+      const message = describeError(error, this.locale);
       this.setMiningError(message);
     }
   }

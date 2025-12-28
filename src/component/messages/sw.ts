@@ -145,4 +145,5 @@ export const sw: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD haitoshi. Inahitajika: {required}, inapatikana: {available}.',
   minerErrorInsufficientBtcForZeld: 'BTC haitoshi kwa uhamisho wa ZELD. Inahitajika: {required} sats, inapatikana: {available} sats.',
   minerErrorInvalidTargetZeros: 'Idadi ya sifuri si sahihi: {value}. Lazima iwe kati ya 6 na 10.',
+  minerErrorNotInstalled: 'Moduli ya uchimbaji haipatikani. Sakinisha zeldhash-miner: npm install zeldhash-miner',
 };

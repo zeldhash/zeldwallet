@@ -145,4 +145,5 @@ export const ko: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD가 부족합니다. 필요: {required}, 사용 가능: {available}.',
   minerErrorInsufficientBtcForZeld: 'ZELD 전송에 필요한 BTC가 부족합니다. 필요: {required} sats, 사용 가능: {available} sats.',
   minerErrorInvalidTargetZeros: '잘못된 제로 수: {value}. 6에서 10 사이여야 합니다.',
+  minerErrorNotInstalled: '마이닝 모듈을 사용할 수 없습니다. zeldhash-miner를 설치하세요: npm install zeldhash-miner',
 };

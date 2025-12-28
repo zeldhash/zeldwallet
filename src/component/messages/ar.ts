@@ -145,4 +145,5 @@ export const ar: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'رصيد ZELD غير كافٍ. المطلوب: {required}، المتاح: {available}.',
   minerErrorInsufficientBtcForZeld: 'رصيد BTC غير كافٍ لتحويل ZELD. المطلوب: {required} ساتوشي، المتاح: {available} ساتوشي.',
   minerErrorInvalidTargetZeros: 'عدد الأصفار غير صالح: {value}. يجب أن يكون بين 6 و 10.',
+  minerErrorNotInstalled: 'وحدة التعدين غير متوفرة. قم بتثبيت zeldhash-miner: npm install zeldhash-miner',
 };

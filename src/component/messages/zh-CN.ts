@@ -145,4 +145,5 @@ export const zhCN: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD 不足。需要 {required}，可用 {available}。',
   minerErrorInsufficientBtcForZeld: 'ZELD 转账 BTC 不足。需要 {required} 聪，可用 {available} 聪。',
   minerErrorInvalidTargetZeros: '无效的零数量：{value}。必须在 6 到 10 之间。',
+  minerErrorNotInstalled: '挖矿模块不可用。请安装 zeldhash-miner：npm install zeldhash-miner',
 };

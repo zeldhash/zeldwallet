@@ -145,4 +145,5 @@ export const ro: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'ZELD insuficient. Necesar: {required}, disponibil: {available}.',
   minerErrorInsufficientBtcForZeld: 'BTC insuficient pentru transfer ZELD. Necesar: {required} satoshi, disponibil: {available} satoshi.',
   minerErrorInvalidTargetZeros: 'Număr de zerouri invalid: {value}. Trebuie să fie între 6 și 10.',
+  minerErrorNotInstalled: 'Modulul de minerit nu este disponibil. Instalați zeldhash-miner: npm install zeldhash-miner',
 };

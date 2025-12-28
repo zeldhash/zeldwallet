@@ -154,6 +154,7 @@ export type LocaleStrings = {
   minerErrorInsufficientZeld: string;
   minerErrorInsufficientBtcForZeld: string;
   minerErrorInvalidTargetZeros: string;
+  minerErrorNotInstalled: string;
 };
 
 export type LocaleStringsInput = Partial<LocaleStrings>;

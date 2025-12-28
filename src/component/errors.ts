@@ -42,6 +42,7 @@ export const describeError = (error: unknown, locale: LocaleKey): string => {
     'MINER_INSUFFICIENT_ZELD': 'minerErrorInsufficientZeld',
     'MINER_INSUFFICIENT_BTC_FOR_ZELD': 'minerErrorInsufficientBtcForZeld',
     'MINER_INVALID_TARGET_ZEROS': 'minerErrorInvalidTargetZeros',
+    'MINER_NOT_INSTALLED': 'minerErrorNotInstalled',
   };
 
   if (code && code in minerErrorMap) {

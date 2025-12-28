@@ -145,4 +145,5 @@ export const bn: LocaleStringsInput = {
   minerErrorInsufficientZeld: 'অপর্যাপ্ত ZELD। প্রয়োজন: {required}, উপলব্ধ: {available}।',
   minerErrorInsufficientBtcForZeld: 'ZELD ট্রান্সফারের জন্য অপর্যাপ্ত BTC। প্রয়োজন: {required} স্যাটস, উপলব্ধ: {available} স্যাটস।',
   minerErrorInvalidTargetZeros: 'অবৈধ শূন্য সংখ্যা: {value}। 6 থেকে 10 এর মধ্যে হতে হবে।',
+  minerErrorNotInstalled: 'মাইনিং মডিউল উপলব্ধ নেই। zeldhash-miner ইনস্টল করুন: npm install zeldhash-miner',
 };
