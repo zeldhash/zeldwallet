@@ -3,7 +3,7 @@
   "overrides": {
     "valibot": "^1.2.0"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser",
   "type": "module",
   "main": "./dist/zeldwallet.es.js",
@@ -16,8 +16,12 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
+  "bin": {
+    "zeldwallet-setup": "./bin/setup.js"
+  },
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0"
@@ -39,8 +43,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts --max-warnings 0",
-    "typecheck": "tsc --noEmit",
-    "postinstall": "npm run copy-wasm"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "bitcoin",

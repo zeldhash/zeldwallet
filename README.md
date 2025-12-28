@@ -24,6 +24,28 @@ ZeldWallet combines Bitcoin key generation, secure storage (IndexedDB + Web Cryp
 npm install zeldwallet
 ```
 
+### WASM Mining Setup (Optional)
+
+If you want to use the mining functionality, run the setup script to copy the required WASM files to your `public/` folder:
+
+```bash
+npx zeldwallet-setup
+```
+
+This copies:
+- WASM files to `public/wasm/`
+- Web worker to `public/worker.js`
+
+You can also add this to your `package.json` scripts:
+
+```json
+{
+  "scripts": {
+    "postinstall": "zeldwallet-setup"
+  }
+}
+```
+
 ## Quick Start
 
 ### Create a New Wallet
