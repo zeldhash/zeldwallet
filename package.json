@@ -3,7 +3,7 @@
   "overrides": {
     "valibot": "^1.2.0"
   },
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser",
   "type": "module",
   "main": "./dist/zeldwallet.es.js",

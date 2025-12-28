@@ -15,7 +15,11 @@ import {
   type SupportedWalletId,
   type WalletDiscovery,
 } from './wallets';
-import { ZeldMiner, ZeldMinerError, ZeldMinerErrorCode, type ProgressStats, type MineResult } from 'zeldhash-miner';
+// Types imported statically (no runtime import, compatible with Next.js/Turbopack)
+import type { ZeldMiner, ZeldMinerError, ProgressStats, MineResult } from 'zeldhash-miner';
+
+// Lazy-loaded miner module reference (loaded only when startHunting is called)
+let zeldMinerModule: typeof import('zeldhash-miner') | undefined;
 
 const BALANCE_REFRESH_INTERVAL_MS = 30_000;
 
@@ -1533,10 +1537,17 @@ export class ZeldWalletController {
       }
       this.setHuntingState({ inputUtxoZeldBalances });
 
+      // Lazy-load zeldhash-miner module (avoids Worker initialization at import time)
+      // This is required for Next.js/Turbopack compatibility
+      if (!zeldMinerModule) {
+        zeldMinerModule = await import('zeldhash-miner');
+      }
+      const { ZeldMiner: MinerClass } = zeldMinerModule;
+
       // Create miner instance
       const batchSize = hunting.useGpu ? GPU_BATCH_SIZE : CPU_BATCH_SIZE;
       const feeRate = this.getCurrentFeeRate();
-      this.miner = new ZeldMiner({
+      this.miner = new MinerClass({
         network: network === 'mainnet' ? 'mainnet' : 'testnet',
         batchSize,
         useWebGPU: hunting.useGpu,
@@ -1585,7 +1596,7 @@ export class ZeldWalletController {
 
       this.miner.on('error', (err: ZeldMinerError) => {
         console.error('[ZeldWalletController] Mining error event:', err.code, err.message, err);
-        if (err.code === ZeldMinerErrorCode.MINING_ABORTED) {
+        if (zeldMinerModule && err.code === zeldMinerModule.ZeldMinerErrorCode.MINING_ABORTED) {
           // User stopped mining, don't show as error
           return;
         }
@@ -1616,10 +1627,14 @@ export class ZeldWalletController {
       });
     } catch (error) {
       console.error('[ZeldWalletController] Mining catch error:', error);
-      if (error instanceof ZeldMinerError && error.code === ZeldMinerErrorCode.MINING_ABORTED) {
-        // User stopped mining
-        console.log('[ZeldWalletController] Mining aborted by user');
-        return;
+      // Check if this is an aborted mining error (user stopped)
+      if (zeldMinerModule) {
+        const { ZeldMinerError: MinerErrorClass, ZeldMinerErrorCode } = zeldMinerModule;
+        if (error instanceof MinerErrorClass && error.code === ZeldMinerErrorCode.MINING_ABORTED) {
+          // User stopped mining
+          console.log('[ZeldWalletController] Mining aborted by user');
+          return;
+        }
       }
       const message = error instanceof Error ? error.message : 'Mining failed';
       this.setMiningError(message);
