@@ -3,7 +3,7 @@
   "overrides": {
     "valibot": "^1.2.0"
   },
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser",
   "type": "module",
   "main": "./dist/zeldwallet.es.js",
@@ -25,7 +25,7 @@
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0",
-    "zeldhash-miner": "0.2.3"
+    "zeldhash-miner": "0.2.4"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -101,6 +101,6 @@
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
     "vitest": "^4.0.16",
-    "zeldhash-miner": "^0.2.3"
+    "zeldhash-miner": "^0.2.4"
   }
 }
