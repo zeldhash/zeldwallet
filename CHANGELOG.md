@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.11] - 2025-01-03
+
+### Fixed
+
+- Fixed balance fetching failing when Leather wallet returns Stacks addresses alongside Bitcoin addresses
+- Added Bitcoin address validation to filter out non-Bitcoin address formats (bech32, legacy, P2SH)
+- Changed `Promise.all` to `Promise.allSettled` for balance fetching to prevent one address error from failing the entire batch
+
 ## [0.1.10] - 2025-12-28
 
 ### Fixed
@@ -135,6 +143,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Dual licensing under MIT or Apache-2.0
 
+[0.1.11]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.10...v0.1.11
+[0.1.10]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.6...v0.1.7

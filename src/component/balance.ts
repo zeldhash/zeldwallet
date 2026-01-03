@@ -6,6 +6,20 @@
  */
 
 import type { AddressInfo } from '../types';
+
+// Simple Bitcoin address check (mainnet + testnet). We keep this lightweight to
+// avoid pulling extra deps into the balance helper.
+const isBitcoinAddress = (address: string): boolean => {
+  if (!address) return false;
+  const trimmed = address.trim();
+  // bech32/bech32m mainnet + testnet
+  if (/^(bc1|tb1)[0-9a-z]+$/i.test(trimmed)) return true;
+  // legacy/p2sh mainnet
+  if (/^[13][1-9A-HJ-NP-Za-km-z]{25,34}$/.test(trimmed)) return true;
+  // legacy/p2sh testnet
+  if (/^[mn2][1-9A-HJ-NP-Za-km-z]{25,34}$/.test(trimmed)) return true;
+  return false;
+};
 import { DEFAULT_ELECTRS_URL, DEFAULT_ZELDHASH_API_URL } from './constants';
 
 export type UtxoResponse = {
@@ -115,11 +129,23 @@ export async function fetchBalances(
     return { btcSats: 0, zeldBalance: 0, btcPaymentSats: 0 };
   }
 
-  // Find payment address by purpose, not by position
-  const paymentAddress = addresses.find((a) => a.purpose === 'payment');
-  const addressStrings = addresses.map((a) => a.address).filter(Boolean);
+  // Keep only Bitcoin addresses (Leather can return Stacks addresses)
+  const filtered = addresses.filter((a) => isBitcoinAddress(a.address));
+  if (filtered.length !== addresses.length) {
+    const dropped = addresses.filter((a) => !isBitcoinAddress(a.address));
+    console.warn('[fetchBalances] Dropping non-Bitcoin addresses', { dropped: dropped.map((d) => d.address) });
+  }
 
-  const results = await Promise.all(
+  // Find payment address by purpose, not by position
+  const paymentAddress = filtered.find((a) => a.purpose === 'payment');
+  const addressStrings = filtered.map((a) => a.address).filter(Boolean);
+
+  if (addressStrings.length === 0) {
+    return { btcSats: 0, zeldBalance: 0, btcPaymentSats: 0 };
+  }
+
+  // Fetch balances per address, but don't fail the whole batch if one address errors
+  const results = await Promise.allSettled(
     addressStrings.map((addr) => fetchAddressBalance(addr, electrsUrl, zeldhashApiUrl))
   );
 
@@ -127,14 +153,28 @@ export async function fetchBalances(
   let btcPaymentSats = 0;
   if (paymentAddress) {
     const paymentIndex = addressStrings.indexOf(paymentAddress.address);
-    if (paymentIndex >= 0 && results[paymentIndex]) {
-      btcPaymentSats = results[paymentIndex].btcSats;
+    if (paymentIndex >= 0) {
+      const paymentResult = results[paymentIndex];
+      if (paymentResult.status === 'fulfilled') {
+        btcPaymentSats = paymentResult.value.btcSats;
+      }
     }
   }
 
+  const fulfilled = results.filter((r): r is PromiseFulfilledResult<BalanceResult> => r.status === 'fulfilled');
+
+  if (fulfilled.length === 0) {
+    // If everything failed, surface the first error
+    const firstRejection = results.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
+    if (firstRejection) {
+      throw firstRejection.reason;
+    }
+    return { btcSats: 0, zeldBalance: 0, btcPaymentSats };
+  }
+
   return {
-    btcSats: results.reduce((sum, r) => sum + r.btcSats, 0),
-    zeldBalance: results.reduce((sum, r) => sum + r.zeldBalance, 0),
+    btcSats: fulfilled.reduce((sum, r) => sum + r.value.btcSats, 0),
+    zeldBalance: fulfilled.reduce((sum, r) => sum + r.value.zeldBalance, 0),
     btcPaymentSats,
   };
 }

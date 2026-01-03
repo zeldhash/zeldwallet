@@ -579,8 +579,26 @@ export class ZeldWalletController {
       return;
     }
 
-    // Filter out addresses with empty address strings
-    const validAddresses = addresses.filter((a) => Boolean(a.address));
+    // Determine the active network to validate addresses (external uses preferred/external network)
+    const network =
+      this.state.walletKind === 'external'
+        ? this.state.externalNetwork ?? this.preferredNetwork
+        : ZeldWallet.isUnlocked()
+          ? ZeldWallet.getNetwork()
+          : this.preferredNetwork;
+
+    // Filter out addresses with empty or non-Bitcoin formats (e.g., Stacks address from Leather)
+    const validAddresses = addresses.filter((a) => Boolean(a.address) && isValidBitcoinAddress(a.address, network));
+    if (validAddresses.length !== addresses.length) {
+      const dropped = addresses.filter((a) => !a.address || !isValidBitcoinAddress(a.address, network));
+      console.warn('[refreshBalances] Dropping non-Bitcoin addresses from balance calculation', {
+        network,
+        total: addresses.length,
+        kept: validAddresses.length,
+        dropped,
+      });
+    }
+
     if (validAddresses.length === 0) {
       this.setState({ balance: undefined });
       return;
