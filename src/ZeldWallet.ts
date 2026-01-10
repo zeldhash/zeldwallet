@@ -166,6 +166,8 @@ export class ZeldWallet {
     // Store custom derivation paths if provided
     if (customPaths) {
       this.config.customPaths = customPaths;
+      // Also set them in KeyManager for address lookups during signing
+      this.keyManager.setCustomPaths(customPaths);
     }
 
     // Persist initial config (network, custom paths, etc.)
@@ -694,6 +696,8 @@ export class ZeldWallet {
       // Restore custom derivation paths
       if (config?.customPaths) {
         this.config.customPaths = config.customPaths;
+        // Also set them in KeyManager for address lookups during signing
+        this.keyManager.setCustomPaths(config.customPaths);
       }
     } catch {
       // Ignore malformed config to avoid blocking unlock; defaults stay.

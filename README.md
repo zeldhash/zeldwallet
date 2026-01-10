@@ -7,7 +7,7 @@
 
 Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser.
 
-ZeldWallet combines Bitcoin key generation, secure storage (IndexedDB + Web Crypto API), and WBIP004 standard compatibility to be detected by existing Bitcoin applications like sats-connect.
+Built for [ZeldHash](https://zeldhash.com), ZeldWallet combines Bitcoin key generation, secure storage (IndexedDB + Web Crypto API), and WBIP004 standard compatibility to be detected by existing Bitcoin applications like sats-connect.
 
 ## Features
 

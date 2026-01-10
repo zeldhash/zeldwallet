@@ -78,6 +78,14 @@ const ADDRESS_LOOKUP_LIMITS: AddressLookupConfig = {
 };
 
 /**
+ * Custom derivation paths for non-standard wallet configurations
+ */
+export type CustomPaths = {
+  payment?: string;
+  ordinals?: string;
+};
+
+/**
  * KeyManager class for Bitcoin key operations
  */
 export class KeyManager {
@@ -86,6 +94,7 @@ export class KeyManager {
   private network: NetworkType = 'mainnet';
   private derivedKeys: Map<string, HDKey> = new Map();
   private addressLookup: AddressLookupConfig = { ...DEFAULT_ADDRESS_LOOKUP };
+  private customPaths: CustomPaths = {};
 
   private assertUnlocked(): void {
     if (!this.masterKey || !this.mnemonic) {
@@ -99,6 +108,21 @@ export class KeyManager {
    */
   generateMnemonic(strength: 128 | 256 = 128): string {
     return bip39.generateMnemonic(wordlist, strength);
+  }
+
+  /**
+   * Set custom derivation paths for non-standard wallet configurations.
+   * These paths will be checked first when resolving addresses.
+   */
+  setCustomPaths(paths: CustomPaths | undefined): void {
+    this.customPaths = paths ?? {};
+  }
+
+  /**
+   * Get the current custom derivation paths.
+   */
+  getCustomPaths(): CustomPaths {
+    return { ...this.customPaths };
   }
 
   /**
@@ -380,9 +404,28 @@ export class KeyManager {
   }
 
   /**
-   * Find the derivation path for an address
+   * Find the derivation path for an address.
+   * Checks custom paths first, then scans standard derivation paths.
    */
   findAddressPath(address: string): { path: string; type: AddressType } | null {
+    // First, check custom paths (these take priority for non-standard wallets)
+    const customPathsToCheck = [
+      this.customPaths.payment,
+      this.customPaths.ordinals,
+    ].filter((p): p is string => !!p);
+
+    for (const customPath of customPathsToCheck) {
+      try {
+        const derived = this.deriveAddressFromPath(customPath);
+        if (derived.address === address) {
+          return { path: derived.path, type: derived.type };
+        }
+      } catch {
+        // Invalid path format, skip
+      }
+    }
+
+    // Then scan standard derivation paths
     const types: DerivationPathType[] = ['legacy', 'nestedSegwit', 'nativeSegwit', 'taproot'];
 
     for (const type of types) {
@@ -813,6 +856,9 @@ export class KeyManager {
 
     // Clear derived keys
     this.derivedKeys.clear();
+
+    // Clear custom paths
+    this.customPaths = {};
   }
 }
 

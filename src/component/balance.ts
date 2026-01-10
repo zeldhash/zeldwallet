@@ -140,19 +140,22 @@ export async function fetchBalances(
   const paymentAddress = filtered.find((a) => a.purpose === 'payment');
   const addressStrings = filtered.map((a) => a.address).filter(Boolean);
 
-  if (addressStrings.length === 0) {
+  // Deduplicate addresses to avoid double-counting when payment === ordinals
+  const uniqueAddresses = [...new Set(addressStrings)];
+
+  if (uniqueAddresses.length === 0) {
     return { btcSats: 0, zeldBalance: 0, btcPaymentSats: 0 };
   }
 
-  // Fetch balances per address, but don't fail the whole batch if one address errors
+  // Fetch balances per unique address, but don't fail the whole batch if one address errors
   const results = await Promise.allSettled(
-    addressStrings.map((addr) => fetchAddressBalance(addr, electrsUrl, zeldhashApiUrl))
+    uniqueAddresses.map((addr) => fetchAddressBalance(addr, electrsUrl, zeldhashApiUrl))
   );
 
   // Find payment balance by matching the address string
   let btcPaymentSats = 0;
   if (paymentAddress) {
-    const paymentIndex = addressStrings.indexOf(paymentAddress.address);
+    const paymentIndex = uniqueAddresses.indexOf(paymentAddress.address);
     if (paymentIndex >= 0) {
       const paymentResult = results[paymentIndex];
       if (paymentResult.status === 'fulfilled') {

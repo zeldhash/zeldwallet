@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.13] - 2025-01-07
+
+### Fixed
+
+- Fixed custom derivation paths not being propagated to KeyManager during wallet initialization and unlock
+- Fixed balance double-counting when payment and ordinals addresses are the same (now deduplicates addresses before fetching)
+- Fixed PSBT signing failing for wallets with custom derivation paths by including `derivationPath` in sign inputs
+- Fixed ZELD sending not selecting UTXOs with ZELD balance from the payment address (now selects from both ordinals and payment addresses)
+- Fixed minimum BTC calculation for ZELD sending (now requires 3 × DUST for 3 outputs instead of 2)
+- Fixed potential UTXO double-selection in miner by tracking already-selected UTXOs
+
+### Added
+
+- Added `setCustomPaths()` and `getCustomPaths()` methods to KeyManager for non-standard wallet configurations
+- KeyManager's `findAddressPath()` now checks custom paths first before scanning standard derivation paths
+
 ## [0.1.12] - 2025-01-03
 
 ### Fixed
@@ -151,6 +167,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Dual licensing under MIT or Apache-2.0
 
+[0.1.13]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.12...v0.1.13
 [0.1.12]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.9...v0.1.10

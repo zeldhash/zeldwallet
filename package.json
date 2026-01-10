@@ -3,7 +3,7 @@
   "overrides": {
     "valibot": "^1.2.0"
   },
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser",
   "type": "module",
   "main": "./dist/zeldwallet.es.js",
@@ -68,7 +68,7 @@
   "bugs": {
     "url": "https://github.com/ouziel-slama/zeldwallet/issues"
   },
-  "homepage": "https://github.com/ouziel-slama/zeldwallet#readme",
+  "homepage": "https://zeldhash.com",
   "dependencies": {
     "@noble/hashes": "^1.3.3",
     "@noble/secp256k1": "^2.1.0",

@@ -255,7 +255,7 @@ export function prepareBtcSendHunt(
  *
  * Algorithm:
  * - Inputs:
- *   1. Starting with the largest, select Ordinals UTXOs to cover zeld_output.amount.
+ *   1. Starting with the largest, select UTXOs with ZELD (from both ordinals and payment addresses) to cover zeld_output.amount.
  *   2. If total BTC from selected inputs < 2 * DUST + MIN_FEE_RESERVE,
  *      add more UTXOs (Ordinals or Payment) to reach that threshold.
  * - Outputs:
@@ -267,7 +267,7 @@ export function prepareBtcSendHunt(
  */
 export function prepareZeldSendHunt(
   paymentAddress: string,
-  paymentUtxos: UtxoInfo[],
+  paymentUtxos: UtxoInfo[] | OrdinalsUtxo[],
   ordinalsAddress: string,
   ordinalsUtxos: OrdinalsUtxo[],
   zeldOutput: ZeldOutput,
@@ -275,19 +275,32 @@ export function prepareZeldSendHunt(
   useGpu: boolean,
   network: NetworkType = 'mainnet'
 ): MinerArgs {
-  const minBtcRequired = 2 * DUST;
+  // Need enough BTC for 3 DUST outputs (ZELD change + ZELD recipient + BTC change)
+  const minBtcRequired = 3 * DUST;
 
-  // Step 1: Select Ordinals UTXOs to cover zeld_output.amount
+  // Step 1: Select UTXOs with ZELD from BOTH ordinals and payment addresses
+  // Combine all confirmed UTXOs with ZELD balance, tracking their source address
+  type ZeldUtxoWithAddress = OrdinalsUtxo & { sourceAddress: string };
+
+  const allZeldUtxos: ZeldUtxoWithAddress[] = [
+    // Ordinals UTXOs with ZELD
+    ...ordinalsUtxos
+      .filter((u) => u.status.confirmed && u.zeldBalance > 0)
+      .map((u) => ({ ...u, sourceAddress: ordinalsAddress })),
+    // Payment UTXOs with ZELD (if they have zeldBalance property)
+    ...(paymentUtxos as OrdinalsUtxo[])
+      .filter((u) => u.status.confirmed && (u.zeldBalance ?? 0) > 0)
+      .map((u) => ({ ...u, sourceAddress: paymentAddress })),
+  ];
+
   // Sort by zeldBalance descending (greedy)
-  const confirmedOrdinalsUtxos = ordinalsUtxos
-    .filter((u) => u.status.confirmed && u.zeldBalance > 0)
-    .sort((a, b) => b.zeldBalance - a.zeldBalance);
+  allZeldUtxos.sort((a, b) => b.zeldBalance - a.zeldBalance);
 
-  const selectedOrdinalsUtxos: OrdinalsUtxo[] = [];
+  const selectedZeldUtxos: ZeldUtxoWithAddress[] = [];
   let totalZeldSelected = 0;
 
-  for (const utxo of confirmedOrdinalsUtxos) {
-    selectedOrdinalsUtxos.push(utxo);
+  for (const utxo of allZeldUtxos) {
+    selectedZeldUtxos.push(utxo);
     totalZeldSelected += utxo.zeldBalance;
     if (totalZeldSelected >= zeldOutput.amount) {
       break;
@@ -299,13 +312,16 @@ export function prepareZeldSendHunt(
   }
 
   // Step 2: Check if we have enough BTC, add more UTXOs if needed
-  let totalBtcSelected = selectedOrdinalsUtxos.reduce((sum, u) => sum + u.value, 0);
+  let totalBtcSelected = selectedZeldUtxos.reduce((sum, u) => sum + u.value, 0);
   const additionalInputs: Array<{ utxo: UtxoInfo; address: string }> = [];
+
+  // Track which UTXOs are already selected
+  const selectedTxids = new Set(selectedZeldUtxos.map((u) => `${u.txid}:${u.vout}`));
 
   if (totalBtcSelected < minBtcRequired) {
     // First try remaining Ordinals UTXOs (without Zeld balance, or already not selected)
     const remainingOrdinalsUtxos = ordinalsUtxos
-      .filter((u) => u.status.confirmed && !selectedOrdinalsUtxos.includes(u))
+      .filter((u) => u.status.confirmed && !selectedTxids.has(`${u.txid}:${u.vout}`))
       .sort((a, b) => b.value - a.value);
 
     for (const utxo of remainingOrdinalsUtxos) {
@@ -319,7 +335,7 @@ export function prepareZeldSendHunt(
     // If still not enough, use Payment UTXOs
     if (totalBtcSelected < minBtcRequired) {
       const confirmedPaymentUtxos = paymentUtxos
-        .filter((u) => u.status.confirmed)
+        .filter((u) => u.status.confirmed && !selectedTxids.has(`${u.txid}:${u.vout}`))
         .sort((a, b) => b.value - a.value);
 
       for (const utxo of confirmedPaymentUtxos) {
@@ -336,9 +352,9 @@ export function prepareZeldSendHunt(
     throw new MinerError('MINER_INSUFFICIENT_BTC_FOR_ZELD', { required: minBtcRequired, available: totalBtcSelected });
   }
 
-  // Build inputs
+  // Build inputs (using the tracked source address for each UTXO)
   const inputs: TxInput[] = [
-    ...selectedOrdinalsUtxos.map((u) => utxoToTxInput(u, ordinalsAddress, network)),
+    ...selectedZeldUtxos.map((u) => utxoToTxInput(u, u.sourceAddress, network)),
     ...additionalInputs.map(({ utxo, address }) => utxoToTxInput(utxo, address, network)),
   ];
 

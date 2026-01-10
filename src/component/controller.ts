@@ -1,6 +1,6 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { ZeldWallet } from '../ZeldWallet';
-import type { AddressInfo, NetworkType, WalletEvent } from '../types';
+import type { AddressInfo, NetworkType, SignInputOptions, WalletEvent } from '../types';
 import { isValidBitcoinAddress } from '../utils/validation';
 import { UnifiedWallet } from '../unifiedWallet';
 import { fetchBalances, type UtxoResponse } from './balance';
@@ -1825,7 +1825,7 @@ export class ZeldWalletController {
       console.log('[confirmTransaction] Our addresses:', { paymentAddr, ordinalsAddr });
 
       // Build sign inputs array with addresses extracted from PSBT witness UTXOs
-      const signInputs: Array<{ index: number; address: string }> = [];
+      const signInputs: SignInputOptions[] = [];
       for (let i = 0; i < inputCount; i++) {
         const input = psbt.data.inputs[i];
         let inputAddress: string | undefined;
@@ -1846,8 +1846,16 @@ export class ZeldWalletController {
         }
 
         if (inputAddress) {
-          signInputs.push({ index: i, address: inputAddress });
-          console.log(`[confirmTransaction] Input ${i} belongs to address: ${inputAddress}`);
+          // Find the matching address info to get the derivationPath
+          // This is crucial for custom derivation paths that KeyManager.findAddressPath() won't find
+          const matchingAddressInfo = addresses.find(a => a.address === inputAddress);
+          
+          signInputs.push({ 
+            index: i, 
+            address: inputAddress,
+            derivationPath: matchingAddressInfo?.derivationPath,
+          });
+          console.log(`[confirmTransaction] Input ${i} belongs to address: ${inputAddress}, derivationPath: ${matchingAddressInfo?.derivationPath ?? 'not found'}`);
         } else {
           console.warn(`[confirmTransaction] Could not determine address for input ${i}`);
         }
