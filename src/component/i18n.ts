@@ -77,6 +77,8 @@ export type LocaleStrings = {
   // Hunting section
   huntingSendBtc: string;
   huntingSendZeld: string;
+  huntingSweep: string;
+  huntingSweepAddressPlaceholder: string;
   huntingZeroCount: string;
   huntingUseGpu: string;
   huntingHunt: string;

@@ -380,6 +380,65 @@ export function prepareZeldSendHunt(
   };
 }
 
+/**
+ * Prepares inputs/outputs for a sweep operation.
+ *
+ * Sweep mode empties the entire wallet to a single destination address.
+ *
+ * Algorithm:
+ * - Inputs: ALL confirmed UTXOs from both payment and ordinals addresses
+ * - Outputs:
+ *   1. Destination address, value = null, change = true (receives all funds minus fee)
+ *
+ * Note: This will sweep all BTC and ZELD to the destination.
+ */
+export function prepareSweepHunt(
+  paymentAddress: string,
+  paymentUtxos: UtxoInfo[],
+  ordinalsAddress: string,
+  ordinalsUtxos: OrdinalsUtxo[],
+  destinationAddress: string,
+  targetZeros: number,
+  useGpu: boolean,
+  network: NetworkType = 'mainnet'
+): MinerArgs {
+  // Collect all confirmed UTXOs from both addresses
+  const confirmedPaymentUtxos = paymentUtxos.filter((u) => u.status.confirmed);
+  const confirmedOrdinalsUtxos = ordinalsUtxos.filter((u) => u.status.confirmed);
+
+  const allInputs: TxInput[] = [
+    ...confirmedPaymentUtxos.map((u) => utxoToTxInput(u, paymentAddress, network)),
+    ...confirmedOrdinalsUtxos.map((u) => utxoToTxInput(u, ordinalsAddress, network)),
+  ];
+
+  if (allInputs.length === 0) {
+    throw new MinerError('MINER_NO_UTXO', { required: DUST });
+  }
+
+  // Calculate total ZELD balance to create distribution
+  const totalZeldBalance = confirmedOrdinalsUtxos.reduce((sum, u) => sum + (u.zeldBalance ?? 0), 0);
+
+  // Single output: destination receives everything (marked as change so miner calculates the amount)
+  const outputs: TxOutput[] = [
+    { address: destinationAddress, change: true },
+  ];
+
+  // If there's ZELD, we need a distribution array
+  // For sweep, all ZELD goes to the single output
+  let distribution: bigint[] | undefined;
+  if (totalZeldBalance > 0) {
+    distribution = [BigInt(totalZeldBalance)];
+  }
+
+  return {
+    inputs: allInputs,
+    outputs,
+    targetZeros,
+    useGpu,
+    distribution,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Entry Point
 // ─────────────────────────────────────────────────────────────────────────────

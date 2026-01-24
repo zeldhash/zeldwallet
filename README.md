@@ -32,9 +32,7 @@ If you want to use the mining functionality, run the setup script to copy the re
 npx zeldwallet-setup
 ```
 
-This copies:
-- WASM files to `public/wasm/`
-- Web worker to `public/worker.js`
+This copies the zeldhash-miner assets (WASM + worker) to `public/zeldhash-miner/`.
 
 You can also add this to your `package.json` scripts:
 

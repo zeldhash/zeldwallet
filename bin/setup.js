@@ -3,7 +3,7 @@
 /**
  * ZeldWallet Setup Script
  *
- * Copies the WASM files and worker.js from zeldhash-miner to the user's public/ folder.
+ * Copies the zeldhash-miner assets to the user's public/ folder.
  * Run this after installing zeldwallet:
  *
  *   npx zeldwallet-setup
@@ -13,7 +13,7 @@
  *   "postinstall": "zeldwallet-setup"
  */
 
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, copyFileSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { createRequire } from 'module';
 
@@ -65,67 +65,34 @@ function main() {
     process.exit(1);
   }
 
-  const wasmSrc = join(minerPath, 'wasm');
-  const workerSrc = join(minerPath, 'dist', 'worker.js');
-  const nonceSrc = join(minerPath, 'dist', 'nonce.js');
+  const assetsSrc = join(minerPath, 'assets');
   const publicDir = join(process.cwd(), 'public');
-  const wasmDest = join(publicDir, 'wasm');
+  const assetsDest = join(publicDir, 'zeldhash-miner');
 
-  // Check source files exist
-  if (!existsSync(wasmSrc)) {
-    console.error(`❌ WASM source not found: ${wasmSrc}`);
+  // Check source folder exists
+  if (!existsSync(assetsSrc)) {
+    console.error(`❌ Assets folder not found: ${assetsSrc}`);
+    console.error('   Make sure zeldhash-miner >= 0.3.1 is installed.');
     process.exit(1);
   }
 
-  if (!existsSync(workerSrc)) {
-    console.error(`❌ Worker source not found: ${workerSrc}`);
-    process.exit(1);
-  }
+  // Create destination directory
+  mkdirSync(assetsDest, { recursive: true });
 
-  if (!existsSync(nonceSrc)) {
-    console.error(`❌ Nonce module source not found: ${nonceSrc}`);
-    process.exit(1);
-  }
-
-  // Create directories
-  mkdirSync(wasmDest, { recursive: true });
-
-  // Copy WASM files
-  const wasmFiles = readdirSync(wasmSrc);
+  // Copy all asset files
+  const assetFiles = readdirSync(assetsSrc);
   let copiedCount = 0;
 
-  for (const file of wasmFiles) {
-    const src = join(wasmSrc, file);
-    const dest = join(wasmDest, file);
+  for (const file of assetFiles) {
+    const src = join(assetsSrc, file);
+    const dest = join(assetsDest, file);
     copyFileSync(src, dest);
     copiedCount++;
   }
 
-  console.log(`✓ Copied ${copiedCount} WASM file(s) to public/wasm/`);
-
-  // Copy and clean worker.js
-  const workerDest = join(publicDir, 'worker.js');
-  let workerContent = readFileSync(workerSrc, 'utf8');
-
-  // Remove sourceMappingURL comment
-  workerContent = workerContent.replace(/\n?\/\/# sourceMappingURL=worker\.js\.map\s*$/, '');
-
-  writeFileSync(workerDest, workerContent);
-  console.log('✓ Copied worker.js to public/');
-
-  // Copy and clean nonce.js (required by worker.js)
-  const nonceDest = join(publicDir, 'nonce.js');
-  let nonceContent = readFileSync(nonceSrc, 'utf8');
-
-  // Remove sourceMappingURL comment
-  nonceContent = nonceContent.replace(/\n?\/\/# sourceMappingURL=nonce\.js\.map\s*$/, '');
-
-  writeFileSync(nonceDest, nonceContent);
-  console.log('✓ Copied nonce.js to public/');
-
+  console.log(`✓ Copied ${copiedCount} file(s) to public/zeldhash-miner/`);
   console.log('\n🎉 ZeldWallet setup complete!');
   console.log('   WASM mining support is now available.\n');
 }
 
 main();
-

@@ -6,9 +6,7 @@ dist/
 .vite/
 
 # WASM assets (copied from zeldminer during build)
-public/wasm/
-public/worker.js
-public/worker.js.map
+public/zeldhash-miner/
 
 # TypeScript
 *.tsbuildinfo

@@ -8,7 +8,7 @@ import { AUTO_LOCK_TIMEOUT_MS, DEFAULT_ELECTRS_URL, DEFAULT_PROVIDER, DEFAULT_ZE
 import { describeError, isPasswordRequiredError, isWrongPasswordError } from './errors';
 import { getDirection, getStrings, resolveLocale, type LocaleKey, type LocaleStrings, type TextDirection } from './i18n';
 import { createInitialHuntingState, createInitialMnemonicRestoreState, createInitialState, type ComponentState, type FeeMode, type MobileActiveTab, type OpReturnData, type ParsedTransaction, type ParsedTxInput, type ParsedTxOutput, type RecommendedFees } from './state';
-import { prepareMinerArgs, MinerError, type OrdinalsUtxo, type UtxoInfo } from './miner';
+import { prepareMinerArgs, prepareSweepHunt, MinerError, type OrdinalsUtxo, type UtxoInfo } from './miner';
 import {
   connectExternalWallet,
   discoverWallets,
@@ -1302,8 +1302,9 @@ export class ZeldWalletController {
       hunting: {
         ...hunting,
         sendBtcChecked: checked,
-        // Mutual exclusivity: uncheck sendZeld if sendBtc is checked
+        // Mutual exclusivity: uncheck sendZeld and sweep if sendBtc is checked
         sendZeldChecked: checked ? false : hunting.sendZeldChecked,
+        sweepChecked: checked ? false : hunting.sweepChecked,
         // Clear fields when unchecking
         ...(checked ? {} : { recipientAddress: '', amount: '', addressError: undefined, amountError: undefined }),
       },
@@ -1316,8 +1317,24 @@ export class ZeldWalletController {
       hunting: {
         ...hunting,
         sendZeldChecked: checked,
-        // Mutual exclusivity: uncheck sendBtc if sendZeld is checked
+        // Mutual exclusivity: uncheck sendBtc and sweep if sendZeld is checked
         sendBtcChecked: checked ? false : hunting.sendBtcChecked,
+        sweepChecked: checked ? false : hunting.sweepChecked,
+        // Clear fields when unchecking
+        ...(checked ? {} : { recipientAddress: '', amount: '', addressError: undefined, amountError: undefined }),
+      },
+    });
+  }
+
+  setHuntingSweep(checked: boolean): void {
+    const hunting = this.state.hunting ?? createInitialHuntingState();
+    this.setState({
+      hunting: {
+        ...hunting,
+        sweepChecked: checked,
+        // Mutual exclusivity: uncheck sendBtc and sendZeld if sweep is checked
+        sendBtcChecked: checked ? false : hunting.sendBtcChecked,
+        sendZeldChecked: checked ? false : hunting.sendZeldChecked,
         // Clear fields when unchecking
         ...(checked ? {} : { recipientAddress: '', amount: '', addressError: undefined, amountError: undefined }),
       },
@@ -1542,6 +1559,12 @@ export class ZeldWalletController {
         return;
       }
       pendingZeldAmount = Math.round(parsedAmount * 100_000_000);
+    } else if (hunting.sweepChecked) {
+      // Validate destination address format (no amount needed for sweep)
+      if (!trimmedAddress || !isValidBitcoinAddress(trimmedAddress, network)) {
+        this.setMiningError(strings.huntingDisabledInvalidAddress);
+        return;
+      }
     }
 
     // Set mining status
@@ -1554,10 +1577,11 @@ export class ZeldWalletController {
         this.fetchOrdinalsUtxosWithZeld(ordinalsAddr.address),
       ]);
 
-      // When not sending ZELD, never include inputs that hold a positive ZELD balance
+      // When not sending ZELD and not sweeping, never include inputs that hold a positive ZELD balance
+      // Sweep mode uses ALL UTXOs (including ZELD-bearing ones)
       let paymentUtxos: OrdinalsUtxo[] = paymentUtxosWithZeld;
       let ordinalsUtxos: OrdinalsUtxo[] = ordinalsUtxosWithZeld;
-      if (!hunting.sendZeldChecked) {
+      if (!hunting.sendZeldChecked && !hunting.sweepChecked) {
         const filterZeldFree = <T extends { zeldBalance?: number }>(utxos: T[]): T[] =>
           utxos.filter((u) => (u.zeldBalance ?? 0) <= 0);
 
@@ -1577,29 +1601,46 @@ export class ZeldWalletController {
         return;
       }
 
-      // Build optional outputs
-      let btcOutput: { address: string; amount: number } | undefined;
-      let zeldOutput: { address: string; amount: number } | undefined;
+      // Prepare miner arguments based on mode
+      let minerArgs;
 
-      if (pendingBtcAmountSats !== undefined) {
-        btcOutput = { address: trimmedAddress, amount: pendingBtcAmountSats };
-      }
-      if (pendingZeldAmount !== undefined) {
-        zeldOutput = { address: trimmedAddress, amount: pendingZeldAmount };
-      }
+      if (hunting.sweepChecked) {
+        // Sweep mode: use all UTXOs, single destination output
+        minerArgs = prepareSweepHunt(
+          paymentAddr.address,
+          paymentUtxos as UtxoInfo[],
+          ordinalsAddr.address,
+          ordinalsUtxos,
+          trimmedAddress,
+          hunting.zeroCount,
+          hunting.useGpu,
+          network
+        );
+      } else {
+        // Build optional outputs for send BTC / send ZELD modes
+        let btcOutput: { address: string; amount: number } | undefined;
+        let zeldOutput: { address: string; amount: number } | undefined;
 
-      // Prepare miner arguments
-      const minerArgs = prepareMinerArgs(
-        paymentAddr.address,
-        paymentUtxos as UtxoInfo[],
-        ordinalsAddr.address,
-        ordinalsUtxos,
-        hunting.zeroCount,
-        hunting.useGpu,
-        btcOutput,
-        zeldOutput,
-        network
-      );
+        if (pendingBtcAmountSats !== undefined) {
+          btcOutput = { address: trimmedAddress, amount: pendingBtcAmountSats };
+        }
+        if (pendingZeldAmount !== undefined) {
+          zeldOutput = { address: trimmedAddress, amount: pendingZeldAmount };
+        }
+
+        // Prepare miner arguments
+        minerArgs = prepareMinerArgs(
+          paymentAddr.address,
+          paymentUtxos as UtxoInfo[],
+          ordinalsAddr.address,
+          ordinalsUtxos,
+          hunting.zeroCount,
+          hunting.useGpu,
+          btcOutput,
+          zeldOutput,
+          network
+        );
+      }
 
       // Store ZELD balances for inputs so we can display them in the confirmation dialog
       // Build a map of "txid:vout" -> zeldBalance from the ordinalsUtxos

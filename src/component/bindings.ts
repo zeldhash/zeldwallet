@@ -376,6 +376,7 @@ export const bindRestoreActions = (shadowRoot: ShadowRoot, handlers: RestoreHand
 type HuntingHandlers = {
   onSendBtcChange: (checked: boolean) => void;
   onSendZeldChange: (checked: boolean) => void;
+  onSweepChange: (checked: boolean) => void;
   onZeroCountChange: (value: number) => void;
   onUseGpuChange: (checked: boolean) => void;
   onFeeModeChange: (mode: string) => void;
@@ -407,6 +408,14 @@ export const bindHunting = (shadowRoot: ShadowRoot, handlers: HuntingHandlers): 
   if (sendZeldCheckbox) {
     sendZeldCheckbox.addEventListener('change', () => {
       handlers.onSendZeldChange(sendZeldCheckbox.checked);
+    });
+  }
+
+  // Sweep checkbox
+  const sweepCheckbox = shadowRoot.querySelector<HTMLInputElement>('[data-hunting-sweep]');
+  if (sweepCheckbox) {
+    sweepCheckbox.addEventListener('change', () => {
+      handlers.onSweepChange(sweepCheckbox.checked);
     });
   }
 

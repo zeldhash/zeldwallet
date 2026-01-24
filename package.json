@@ -3,7 +3,7 @@
   "overrides": {
     "valibot": "^1.2.0"
   },
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser",
   "type": "module",
   "main": "./dist/zeldwallet.es.js",
@@ -25,7 +25,7 @@
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0",
-    "zeldhash-miner": "0.2.5"
+    "zeldhash-miner": "0.3.1"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -39,7 +39,7 @@
     }
   },
   "scripts": {
-    "copy-wasm": "node -e \"const fs=require('fs'),path=require('path');const minerPath='node_modules/zeldhash-miner';if(!fs.existsSync(minerPath)){console.log('zeldhash-miner not installed, skipping wasm copy');process.exit(0);}fs.mkdirSync('public/wasm',{recursive:true});const wasmDir=path.join(minerPath,'wasm');if(fs.existsSync(wasmDir)){fs.readdirSync(wasmDir).forEach(f=>fs.copyFileSync(path.join(wasmDir,f),path.join('public/wasm',f)));}const workerSrc=path.join(minerPath,'dist/worker.js');if(fs.existsSync(workerSrc)){let c=fs.readFileSync(workerSrc,'utf8').replace(/\\n?\\/\\/# sourceMappingURL=worker\\.js\\.map\\s*$/,'');fs.writeFileSync('public/worker.js',c);}const nonceSrc=path.join(minerPath,'dist/nonce.js');if(fs.existsSync(nonceSrc)){let c=fs.readFileSync(nonceSrc,'utf8').replace(/\\n?\\/\\/# sourceMappingURL=nonce\\.js\\.map\\s*$/,'');fs.writeFileSync('public/nonce.js',c);}\"",
+    "copy-wasm": "node -e \"const fs=require('fs'),path=require('path');const minerPath='node_modules/zeldhash-miner';if(!fs.existsSync(minerPath)){console.log('zeldhash-miner not installed, skipping wasm copy');process.exit(0);}const assetsSrc=path.join(minerPath,'assets');const assetsDest='public/zeldhash-miner';if(!fs.existsSync(assetsSrc)){console.error('assets folder not found in zeldhash-miner');process.exit(1);}fs.mkdirSync(assetsDest,{recursive:true});fs.readdirSync(assetsSrc).forEach(f=>fs.copyFileSync(path.join(assetsSrc,f),path.join(assetsDest,f)));console.log('Copied zeldhash-miner assets to public/zeldhash-miner/');\"",
     "dev": "npm run copy-wasm && vite",
     "build": "npm run copy-wasm && npm run lint && tsc && vite build",
     "preview": "vite preview",
@@ -101,6 +101,6 @@
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
     "vitest": "^4.0.16",
-    "zeldhash-miner": "^0.2.5"
+    "zeldhash-miner": "^0.3.1"
   }
 }

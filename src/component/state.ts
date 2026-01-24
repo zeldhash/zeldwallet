@@ -86,6 +86,7 @@ export type RecommendedFees = {
 export type HuntingState = {
   sendBtcChecked: boolean;
   sendZeldChecked: boolean;
+  sweepChecked: boolean;
   zeroCount: number;
   useGpu: boolean;
   recipientAddress: string;
@@ -171,6 +172,7 @@ export type ComponentState = {
 export const createInitialHuntingState = (): HuntingState => ({
   sendBtcChecked: false,
   sendZeldChecked: false,
+  sweepChecked: false,
   zeroCount: 6,
   useGpu: true,
   recipientAddress: '',

@@ -832,6 +832,21 @@ const buildHuntingBlock = (hunting: HuntingView | undefined, locale?: string): s
     `
     : '';
 
+  // Sweep mode: only show destination address field (no amount)
+  const sweepFieldsBlock = hunting.showSweepField
+    ? `
+      <div class="zeldwallet-hunting-send-fields">
+        <input
+          type="text"
+          class="zeldwallet-hunting-input zeldwallet-hunting-address${hunting.addressError ? ' error' : ''}"
+          placeholder="${hunting.sweepAddressPlaceholder}"
+          value="${escapeHtml(hunting.recipientAddress)}"
+          data-hunting-address
+        />
+      </div>
+    `
+    : '';
+
   // Wrap disabled button in a span to enable hover tooltip (disabled buttons don't receive pointer events)
   const huntButton = hunting.huntEnabled
     ? `
@@ -861,13 +876,14 @@ const buildHuntingBlock = (hunting: HuntingView | undefined, locale?: string): s
   return `
     <div class="zeldwallet-hunting">
       ${sendFieldsBlock}
+      ${sweepFieldsBlock}
       <div class="zeldwallet-hunting-controls">
         <label class="zeldwallet-hunting-checkbox${!hunting.sendBtcEnabled ? ' disabled' : ''}">
           <input
             type="checkbox"
             data-hunting-send-btc
             ${hunting.sendBtcChecked ? 'checked' : ''}
-            ${!hunting.sendBtcEnabled || hunting.sendZeldChecked || hunting.isMining ? 'disabled' : ''}
+            ${!hunting.sendBtcEnabled || hunting.sendZeldChecked || hunting.sweepChecked || hunting.isMining ? 'disabled' : ''}
           />
           ${hunting.sendBtcLabel}
         </label>
@@ -876,9 +892,18 @@ const buildHuntingBlock = (hunting: HuntingView | undefined, locale?: string): s
             type="checkbox"
             data-hunting-send-zeld
             ${hunting.sendZeldChecked ? 'checked' : ''}
-            ${!hunting.sendZeldEnabled || hunting.sendBtcChecked || hunting.isMining ? 'disabled' : ''}
+            ${!hunting.sendZeldEnabled || hunting.sendBtcChecked || hunting.sweepChecked || hunting.isMining ? 'disabled' : ''}
           />
           ${hunting.sendZeldLabel}
+        </label>
+        <label class="zeldwallet-hunting-checkbox${!hunting.sweepEnabled ? ' disabled' : ''}">
+          <input
+            type="checkbox"
+            data-hunting-sweep
+            ${hunting.sweepChecked ? 'checked' : ''}
+            ${!hunting.sweepEnabled || hunting.sendBtcChecked || hunting.sendZeldChecked || hunting.isMining ? 'disabled' : ''}
+          />
+          ${hunting.sweepLabel}
         </label>
         ${buildFeeSelector(hunting)}
         <div class="zeldwallet-hunting-slider">

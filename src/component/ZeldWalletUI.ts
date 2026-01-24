@@ -319,6 +319,7 @@ export class ZeldWalletUI extends BaseElement {
       bindHunting(this.shadowRootRef, {
         onSendBtcChange: (checked) => this.controller.setHuntingSendBtc(checked),
         onSendZeldChange: (checked) => this.controller.setHuntingSendZeld(checked),
+        onSweepChange: (checked) => this.controller.setHuntingSweep(checked),
         onZeroCountChange: (value) => this.controller.setHuntingZeroCount(value),
         onUseGpuChange: (checked) => this.controller.setHuntingUseGpu(checked),
         onFeeModeChange: (mode) => this.controller.setHuntingFeeMode(mode as import('./state').FeeMode),

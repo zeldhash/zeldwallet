@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.15] - 2026-01-24
+
+### Added
+
+- **Sweep mode**: New "Sweep" checkbox in the hunting UI that allows emptying the entire wallet (all BTC and ZELD) to a single destination address. When enabled, all UTXOs from both payment and ordinals addresses are used as inputs, with the destination address receiving all funds minus the network fee.
+
+### Changed
+
+- **Updated `zeldhash-miner` to 0.3.1**: Assets are now bundled in a single `public/zeldhash-miner/` folder (previously `public/wasm/` + `public/worker.js` + `public/nonce.js`)
+- Updated `zeldwallet-setup` script and `copy-wasm` npm script to use the new unified asset structure
+- `nonce.js` is no longer needed (worker is now a self-contained bundle)
+
+### Migration
+
+If you were using the previous setup, delete the old asset files and re-run the setup:
+
+```bash
+rm -rf public/wasm public/worker.js public/nonce.js
+npx zeldwallet-setup
+```
+
 ## [0.1.14] - 2025-01-11
 
 ### Fixed
@@ -174,6 +195,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Dual licensing under MIT or Apache-2.0
 
+[0.1.15]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.14...v0.1.15
+[0.1.14]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.13...v0.1.14
 [0.1.13]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.12...v0.1.13
 [0.1.12]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/ouziel-slama/zeldwallet/compare/v0.1.10...v0.1.11

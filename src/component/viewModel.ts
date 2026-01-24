@@ -249,6 +249,9 @@ export type HuntingView = {
   sendZeldLabel: string;
   sendZeldChecked: boolean;
   sendZeldEnabled: boolean;
+  sweepLabel: string;
+  sweepChecked: boolean;
+  sweepEnabled: boolean;
   zeroCountLabel: string;
   zeroCount: number;
   useGpuLabel: string;
@@ -257,7 +260,9 @@ export type HuntingView = {
   huntEnabled: boolean;
   huntDisabledReason?: string;
   showSendFields: boolean;
-  sendType: 'btc' | 'zeld' | null;
+  showSweepField: boolean;
+  sendType: 'btc' | 'zeld' | 'sweep' | null;
+  sweepAddressPlaceholder: string;
   addressPlaceholder: string;
   amountPlaceholder: string;
   recipientAddress: string;
@@ -639,10 +644,12 @@ function buildHuntingView(state: ComponentState, strings: LocaleStrings, locale:
   // Simplified enable conditions - let zeldhash-miner handle insufficient balance errors
   const sendBtcEnabled = btcSats > 0;
   const sendZeldEnabled = btcSats > 0 && zeldBalance > 0;
+  const sweepEnabled = btcSats > 0;
 
   // Determine which send fields to show
   const showSendFields = hunting.sendBtcChecked || hunting.sendZeldChecked;
-  const sendType = hunting.sendBtcChecked ? 'btc' : hunting.sendZeldChecked ? 'zeld' : null;
+  const showSweepField = hunting.sweepChecked;
+  const sendType = hunting.sendBtcChecked ? 'btc' : hunting.sendZeldChecked ? 'zeld' : hunting.sweepChecked ? 'sweep' : null;
 
   // Calculate hunt button enabled state and reason
   const { huntEnabled, huntDisabledReason } = computeHuntEnabled(
@@ -711,6 +718,9 @@ function buildHuntingView(state: ComponentState, strings: LocaleStrings, locale:
     sendZeldLabel: strings.huntingSendZeld,
     sendZeldChecked: hunting.sendZeldChecked,
     sendZeldEnabled,
+    sweepLabel: strings.huntingSweep,
+    sweepChecked: hunting.sweepChecked,
+    sweepEnabled,
     zeroCountLabel: strings.huntingZeroCount,
     zeroCount: hunting.zeroCount,
     useGpuLabel: strings.huntingUseGpu,
@@ -719,7 +729,9 @@ function buildHuntingView(state: ComponentState, strings: LocaleStrings, locale:
     huntEnabled: huntEnabled && !isMining,
     huntDisabledReason: isMining ? strings.miningStatusMining : huntDisabledReason,
     showSendFields,
+    showSweepField,
     sendType,
+    sweepAddressPlaceholder: strings.huntingSweepAddressPlaceholder,
     addressPlaceholder: strings.huntingAddressPlaceholder,
     amountPlaceholder: sendType === 'zeld' ? strings.huntingAmountPlaceholderZeld : strings.huntingAmountPlaceholder,
     recipientAddress: hunting.recipientAddress,
@@ -872,7 +884,7 @@ function computeHuntEnabled(
   strings: LocaleStrings
 ): { huntEnabled: boolean; huntDisabledReason?: string } {
   // Case 1: Simple hunt (no checkboxes checked) - just need some BTC
-  if (!hunting.sendBtcChecked && !hunting.sendZeldChecked) {
+  if (!hunting.sendBtcChecked && !hunting.sendZeldChecked && !hunting.sweepChecked) {
     if (btcSats <= 0) {
       return { huntEnabled: false, huntDisabledReason: strings.huntingDisabledNoBtc };
     }
@@ -912,6 +924,18 @@ function computeHuntEnabled(
     const amountZeld = parseZeldAmount(hunting.amount);
     if (amountZeld <= 0 || hunting.amountError) {
       return { huntEnabled: false, huntDisabledReason: strings.huntingDisabledInvalidAmount };
+    }
+    return { huntEnabled: true };
+  }
+
+  // Case 4: Sweep checked - need BTC > 0 and valid destination address
+  if (hunting.sweepChecked) {
+    if (btcSats <= 0) {
+      return { huntEnabled: false, huntDisabledReason: strings.huntingDisabledNoBtc };
+    }
+    // Need valid destination address
+    if (!hunting.recipientAddress.trim() || hunting.addressError) {
+      return { huntEnabled: false, huntDisabledReason: strings.huntingDisabledInvalidAddress };
     }
     return { huntEnabled: true };
   }

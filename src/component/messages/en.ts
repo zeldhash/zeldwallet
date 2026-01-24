@@ -69,6 +69,8 @@ export const en: LocaleStrings = {
   // Hunting section
   huntingSendBtc: 'Send BTC',
   huntingSendZeld: 'Send Zeld',
+  huntingSweep: 'Sweep',
+  huntingSweepAddressPlaceholder: 'Destination address',
   huntingZeroCount: 'Zero Count',
   huntingUseGpu: 'Use GPU',
   huntingHunt: 'Hunt',
