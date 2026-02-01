@@ -1,8 +1,8 @@
 # ZeldWallet
 
-[![Lint](https://github.com/ouziel-slama/zeldwallet/actions/workflows/lint.yml/badge.svg)](https://github.com/ouziel-slama/zeldwallet/actions/workflows/lint.yml)
-[![Test](https://github.com/ouziel-slama/zeldwallet/actions/workflows/test.yml/badge.svg)](https://github.com/ouziel-slama/zeldwallet/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/ouziel-slama/zeldwallet/graph/badge.svg?token=L5P886HP35)](https://codecov.io/gh/ouziel-slama/zeldwallet)
+[![Lint](https://github.com/zeldhash/zeldwallet/actions/workflows/lint.yml/badge.svg)](https://github.com/zeldhash/zeldwallet/actions/workflows/lint.yml)
+[![Test](https://github.com/zeldhash/zeldwallet/actions/workflows/test.yml/badge.svg)](https://github.com/zeldhash/zeldwallet/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/zeldhash/zeldwallet/graph/badge.svg?token=L5P886HP35)](https://codecov.io/gh/zeldhash/zeldwallet)
 [![npm version](https://img.shields.io/npm/v/zeldwallet.svg)](https://www.npmjs.com/package/zeldwallet)
 
 Lightweight JavaScript library for creating a Bitcoin wallet directly in the browser.

@@ -63,10 +63,10 @@
   "license": "(MIT OR Apache-2.0)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ouziel-slama/zeldwallet.git"
+    "url": "git+https://github.com/zeldhash/zeldwallet.git"
   },
   "bugs": {
-    "url": "https://github.com/ouziel-slama/zeldwallet/issues"
+    "url": "https://github.com/zeldhash/zeldwallet/issues"
   },
   "homepage": "https://zeldhash.com",
   "dependencies": {
